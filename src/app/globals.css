@@ -1,26 +1,39 @@
 @import "tailwindcss";
 
+/*
+ * PMNTX — institutional research terminal, not a consumer dashboard.
+ * Dense, dark-first, data-forward. See docs/ARCHITECTURE.md (once written).
+ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0a0a0a;
+  --foreground: #e5e5e5;
+  --border: #262626;
+  --accent-long: #22c55e;
+  --accent-short: #ef4444;
+  --accent-watch: #eab308;
+  --accent-neutral: #737373;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-border: var(--border);
+  --color-accent-long: var(--accent-long);
+  --color-accent-short: var(--accent-short);
+  --color-accent-watch: var(--accent-watch);
+  --color-accent-neutral: var(--accent-neutral);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid #737373;
+  outline-offset: 2px;
 }
