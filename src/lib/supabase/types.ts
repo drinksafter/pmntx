@@ -28,6 +28,11 @@ export type IntegrationHealthStatus = "NOT_CONFIGURED" | "OK" | "DEGRADED" | "ER
 
 export type AiExecutionStatus = "SUCCEEDED" | "FAILED";
 
+export type SecurityType = "EQUITY" | "ETF" | "ADR" | "OTHER";
+
+export type IngestionStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
+export type IngestionTrigger = "SCHEDULED" | "MANUAL";
+
 export type Database = {
   public: {
     Tables: {
@@ -244,6 +249,222 @@ export type Database = {
         };
         Relationships: [];
       };
+      securities: {
+        Row: {
+          id: string;
+          ticker: string;
+          cik: string | null;
+          name: string;
+          exchange: string | null;
+          sector: string | null;
+          industry: string | null;
+          security_type: SecurityType;
+          is_etf: boolean;
+          is_adr: boolean;
+          market_cap: number | null;
+          is_active: boolean;
+          listed_at: string | null;
+          delisted_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          ticker: string;
+          cik?: string | null;
+          name: string;
+          exchange?: string | null;
+          sector?: string | null;
+          industry?: string | null;
+          security_type?: SecurityType;
+          is_etf?: boolean;
+          is_adr?: boolean;
+          market_cap?: number | null;
+          is_active?: boolean;
+          listed_at?: string | null;
+          delisted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          ticker?: string;
+          cik?: string | null;
+          name?: string;
+          exchange?: string | null;
+          sector?: string | null;
+          industry?: string | null;
+          security_type?: SecurityType;
+          is_etf?: boolean;
+          is_adr?: boolean;
+          market_cap?: number | null;
+          is_active?: boolean;
+          listed_at?: string | null;
+          delisted_at?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      market_prices: {
+        Row: {
+          id: string;
+          security_id: string;
+          price_date: string;
+          open: number | null;
+          high: number | null;
+          low: number | null;
+          close: number;
+          adj_close: number | null;
+          volume: number | null;
+          source: string;
+          ingested_at: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          security_id: string;
+          price_date: string;
+          open?: number | null;
+          high?: number | null;
+          low?: number | null;
+          close: number;
+          adj_close?: number | null;
+          volume?: number | null;
+          source: string;
+          ingested_at?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          security_id?: string;
+          price_date?: string;
+          open?: number | null;
+          high?: number | null;
+          low?: number | null;
+          close?: number;
+          adj_close?: number | null;
+          volume?: number | null;
+          source?: string;
+          ingested_at?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      data_sources: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          category: string;
+          description: string | null;
+          base_url: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          category: string;
+          description?: string | null;
+          base_url?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          category?: string;
+          description?: string | null;
+          base_url?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      data_ingestion_runs: {
+        Row: {
+          id: string;
+          data_source_id: string;
+          status: IngestionStatus;
+          triggered_by: IngestionTrigger;
+          triggered_by_user_id: string | null;
+          started_at: string | null;
+          completed_at: string | null;
+          records_ingested: number;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          data_source_id: string;
+          status?: IngestionStatus;
+          triggered_by?: IngestionTrigger;
+          triggered_by_user_id?: string | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          records_ingested?: number;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          data_source_id?: string;
+          status?: IngestionStatus;
+          triggered_by?: IngestionTrigger;
+          triggered_by_user_id?: string | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          records_ingested?: number;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      source_records: {
+        Row: {
+          id: string;
+          data_source_id: string;
+          data_ingestion_run_id: string | null;
+          source_record_id: string | null;
+          entity_type: string;
+          entity_id: string | null;
+          event_date: string;
+          public_date: string;
+          ingested_at: string;
+          transformation_version: string;
+          raw: unknown | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          data_source_id: string;
+          data_ingestion_run_id?: string | null;
+          source_record_id?: string | null;
+          entity_type: string;
+          entity_id?: string | null;
+          event_date: string;
+          public_date: string;
+          ingested_at?: string;
+          transformation_version?: string;
+          raw?: unknown | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          data_source_id?: string;
+          data_ingestion_run_id?: string | null;
+          source_record_id?: string | null;
+          entity_type?: string;
+          entity_id?: string | null;
+          event_date?: string;
+          public_date?: string;
+          ingested_at?: string;
+          transformation_version?: string;
+          raw?: unknown | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -252,6 +473,9 @@ export type Database = {
       integration_service: IntegrationService;
       integration_health_status: IntegrationHealthStatus;
       ai_execution_status: AiExecutionStatus;
+      security_type: SecurityType;
+      ingestion_status: IngestionStatus;
+      ingestion_trigger: IngestionTrigger;
     };
   };
 };
