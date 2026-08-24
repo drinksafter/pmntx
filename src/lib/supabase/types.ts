@@ -60,6 +60,8 @@ export type IdeaOrigin =
 export type ForecastHorizon = "D1" | "D5" | "D10" | "D21" | "D63" | "D126" | "Y1" | "Y2" | "Y3" | "Y5";
 export type ForecastType = "FORECAST" | "NO_FORECAST" | "INSUFFICIENT_EDGE" | "OUTSIDE_MANDATE";
 
+export type AgentRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -1059,6 +1061,159 @@ export type Database = {
         };
         Relationships: [];
       };
+      agents: {
+        Row: {
+          id: string;
+          internal_name: string;
+          display_name: string;
+          methodology_description: string;
+          inspiration_disclaimer: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          internal_name: string;
+          display_name: string;
+          methodology_description: string;
+          inspiration_disclaimer?: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          internal_name?: string;
+          display_name?: string;
+          methodology_description?: string;
+          inspiration_disclaimer?: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_versions: {
+        Row: {
+          id: string;
+          agent_id: string;
+          version: string;
+          system_prompt: string;
+          config: unknown;
+          created_at: string;
+          activated_at: string | null;
+          retired_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          agent_id: string;
+          version: string;
+          system_prompt: string;
+          config?: unknown;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          agent_id?: string;
+          version?: string;
+          system_prompt?: string;
+          config?: unknown;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Relationships: [];
+      };
+      agent_runs: {
+        Row: {
+          id: string;
+          agent_version_id: string;
+          research_run_id: string;
+          status: AgentRunStatus;
+          started_at: string | null;
+          completed_at: string | null;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_version_id: string;
+          research_run_id: string;
+          status?: AgentRunStatus;
+          started_at?: string | null;
+          completed_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          agent_version_id?: string;
+          research_run_id?: string;
+          status?: AgentRunStatus;
+          started_at?: string | null;
+          completed_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      agent_daily_lists: {
+        Row: {
+          id: string;
+          agent_run_id: string;
+          security_id: string;
+          direction: IdeaDirection;
+          rank: number | null;
+          agent_score: number | null;
+          probability: number | null;
+          thesis: string | null;
+          catalyst: string | null;
+          risks: string | null;
+          invalidation_criteria: string | null;
+          best_horizon_label: string | null;
+          discovery_reason: string | null;
+          data_quality: number | null;
+          frozen_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_run_id: string;
+          security_id: string;
+          direction: IdeaDirection;
+          rank?: number | null;
+          agent_score?: number | null;
+          probability?: number | null;
+          thesis?: string | null;
+          catalyst?: string | null;
+          risks?: string | null;
+          invalidation_criteria?: string | null;
+          best_horizon_label?: string | null;
+          discovery_reason?: string | null;
+          data_quality?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          agent_run_id?: string;
+          security_id?: string;
+          direction?: IdeaDirection;
+          rank?: number | null;
+          agent_score?: number | null;
+          probability?: number | null;
+          thesis?: string | null;
+          catalyst?: string | null;
+          risks?: string | null;
+          invalidation_criteria?: string | null;
+          best_horizon_label?: string | null;
+          discovery_reason?: string | null;
+          data_quality?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       hunter_results: {
         Row: {
           id: string;
@@ -1237,6 +1392,7 @@ export type Database = {
       idea_origin: IdeaOrigin;
       forecast_horizon: ForecastHorizon;
       forecast_type: ForecastType;
+      agent_run_status: AgentRunStatus;
     };
   };
 };
