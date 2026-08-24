@@ -39,6 +39,21 @@ export type ResearchRunOrigin = "PMNTX_CORE" | "AGENT";
 export type ResearchRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 export type IdeaDirection = "LONG" | "SHORT" | "WATCH" | "PASS";
 
+export type AiBudgetEventType =
+  | "BLOCKED_RUN_BUDGET"
+  | "BLOCKED_DAILY_BUDGET"
+  | "BLOCKED_MONTHLY_BUDGET"
+  | "BLOCKED_AGENT_DAILY_BUDGET"
+  | "BLOCKED_SECURITY_BUDGET"
+  | "BLOCKED_REQUEST_LIMIT"
+  | "BLOCKED_TOKEN_LIMIT"
+  | "BLOCKED_RETRY_LIMIT"
+  | "BLOCKED_TIME_LIMIT"
+  | "BLOCKED_KILL_SWITCH"
+  | "BLOCKED_DUPLICATE"
+  | "BLOCKED_REASONING_ROUNDS"
+  | "WARNING_THRESHOLD";
+
 export type Database = {
   public: {
     Tables: {
@@ -218,6 +233,11 @@ export type Database = {
           status: AiExecutionStatus;
           error_message: string | null;
           executed_at: string;
+          research_run_id: string | null;
+          agent_id: string | null;
+          security_id: string | null;
+          workflow_id: string | null;
+          retries: number;
         };
         Insert: {
           id?: string;
@@ -235,6 +255,11 @@ export type Database = {
           status: AiExecutionStatus;
           error_message?: string | null;
           executed_at?: string;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          workflow_id?: string | null;
+          retries?: number;
         };
         Update: {
           id?: string;
@@ -252,6 +277,164 @@ export type Database = {
           status?: AiExecutionStatus;
           error_message?: string | null;
           executed_at?: string;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          workflow_id?: string | null;
+          retries?: number;
+        };
+        Relationships: [];
+      };
+      ai_budget_limits: {
+        Row: {
+          id: string;
+          scope: string;
+          agent_id: string | null;
+          max_cost_per_run_usd: number | null;
+          max_cost_per_day_usd: number | null;
+          max_cost_per_month_usd: number | null;
+          max_cost_per_agent_per_day_usd: number | null;
+          max_cost_per_security_analysis_usd: number | null;
+          max_requests_per_workflow: number | null;
+          max_requests_per_security: number | null;
+          max_input_tokens_per_request: number | null;
+          max_output_tokens_per_request: number | null;
+          max_total_tokens_per_workflow: number | null;
+          max_retries_per_request: number;
+          max_reasoning_rounds: number | null;
+          max_execution_time_seconds: number | null;
+          warning_thresholds: number[];
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          scope?: string;
+          agent_id?: string | null;
+          max_cost_per_run_usd?: number | null;
+          max_cost_per_day_usd?: number | null;
+          max_cost_per_month_usd?: number | null;
+          max_cost_per_agent_per_day_usd?: number | null;
+          max_cost_per_security_analysis_usd?: number | null;
+          max_requests_per_workflow?: number | null;
+          max_requests_per_security?: number | null;
+          max_input_tokens_per_request?: number | null;
+          max_output_tokens_per_request?: number | null;
+          max_total_tokens_per_workflow?: number | null;
+          max_retries_per_request?: number;
+          max_reasoning_rounds?: number | null;
+          max_execution_time_seconds?: number | null;
+          warning_thresholds?: number[];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          scope?: string;
+          agent_id?: string | null;
+          max_cost_per_run_usd?: number | null;
+          max_cost_per_day_usd?: number | null;
+          max_cost_per_month_usd?: number | null;
+          max_cost_per_agent_per_day_usd?: number | null;
+          max_cost_per_security_analysis_usd?: number | null;
+          max_requests_per_workflow?: number | null;
+          max_requests_per_security?: number | null;
+          max_input_tokens_per_request?: number | null;
+          max_output_tokens_per_request?: number | null;
+          max_total_tokens_per_workflow?: number | null;
+          max_retries_per_request?: number;
+          max_reasoning_rounds?: number | null;
+          max_execution_time_seconds?: number | null;
+          warning_thresholds?: number[];
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      ai_system_controls: {
+        Row: {
+          id: boolean;
+          paid_ai_disabled: boolean;
+          disabled_at: string | null;
+          disabled_by: string | null;
+          disabled_reason: string | null;
+          updated_at: string;
+        };
+        Insert: {
+          id?: boolean;
+          paid_ai_disabled?: boolean;
+          disabled_at?: string | null;
+          disabled_by?: string | null;
+          disabled_reason?: string | null;
+          updated_at?: string;
+        };
+        Update: {
+          id?: boolean;
+          paid_ai_disabled?: boolean;
+          disabled_at?: string | null;
+          disabled_by?: string | null;
+          disabled_reason?: string | null;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_budget_events: {
+        Row: {
+          id: string;
+          event_type: AiBudgetEventType;
+          role_code: string | null;
+          research_run_id: string | null;
+          agent_id: string | null;
+          security_id: string | null;
+          detail: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          event_type: AiBudgetEventType;
+          role_code?: string | null;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          detail?: unknown;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          event_type?: AiBudgetEventType;
+          role_code?: string | null;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          detail?: unknown;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_request_fingerprints: {
+        Row: {
+          id: string;
+          research_run_id: string;
+          fingerprint: string;
+          role_code: string;
+          ai_execution_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          research_run_id: string;
+          fingerprint: string;
+          role_code: string;
+          ai_execution_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          research_run_id?: string;
+          fingerprint?: string;
+          role_code?: string;
+          ai_execution_id?: string | null;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -705,6 +888,7 @@ export type Database = {
       research_run_origin: ResearchRunOrigin;
       research_run_status: ResearchRunStatus;
       idea_direction: IdeaDirection;
+      ai_budget_event_type: AiBudgetEventType;
     };
   };
 };

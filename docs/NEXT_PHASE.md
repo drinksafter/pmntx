@@ -29,8 +29,12 @@ Everything here is explicitly out of scope for Phase 1A per `docs/PHASE_1A_SCOPE
 
 ## Portfolio & execution
 - Brokerage connectivity, live execution
+- SchwabMarketDataProvider, SchwabBrokerProvider — preserve compatibility with the AIProvider/data-provider abstractions already in place, do not implement in Phase 1A
 - Portfolio optimization
 - Manual paper/user portfolio entry UI beyond the per-system paper portfolios Phase 1A already tracks for performance
+
+## Distributed research workers
+- ResearchWorker, including future cloud workers or dedicated Mac/OpenClaw research workers — PMNTX/Supabase remains the sole authoritative system of record in Phase 1A; no external worker executes research or writes directly to the Prediction Warehouse
 
 ## Voice / Telnyx
 - Telnyx voice interaction (the Admin integration card and AI-inference adapter interface ship in Phase 1A; voice itself does not)
@@ -42,7 +46,7 @@ Everything here is explicitly out of scope for Phase 1A per `docs/PHASE_1A_SCOPE
 - Ask PMNTX (natural-language research interface)
 - User themes/theses submission UI
 - Dedicated Performance page + Agent Leaderboard
-- Admin Cost/Usage dashboard (the underlying `ai_executions` token/cost fields are recorded in Phase 1A; no dashboard yet)
+- Research-value-per-dollar analytics (cost attribution + outcome data are both recorded in Phase 1A; the cross-analysis isn't built)
 
 ---
 
