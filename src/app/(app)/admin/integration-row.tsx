@@ -63,25 +63,33 @@ export function IntegrationRow({ integration }: { integration: IntegrationStatus
         ) : null}
       </div>
 
-      <form action={formAction} className="mt-3 flex items-center gap-2">
-        <input type="hidden" name="service" value={integration.service} />
-        <input
-          type="password"
-          name="value"
-          placeholder={integration.isConfigured ? "Rotate credential…" : "Paste credential…"}
-          autoComplete="off"
-          className="w-72 max-w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-white outline-none focus:border-neutral-400"
-        />
-        <button
-          type="submit"
-          disabled={pending}
-          className="focus-ring rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-50"
-        >
-          {pending ? "Saving…" : "Save"}
-        </button>
-        {state.error ? <span className="text-xs text-accent-short">{state.error}</span> : null}
-        {state.success ? <span className="text-xs text-accent-long">Saved.</span> : null}
-      </form>
+      {integration.service === "SEC_EDGAR" ? (
+        <p className="mt-3 text-xs text-neutral-600">
+          Set in <code className="rounded bg-neutral-900 px-1 py-0.5">.env.local</code> as{" "}
+          <code className="rounded bg-neutral-900 px-1 py-0.5">PMNTX_SEC_EDGAR_CONTACT_EMAIL</code> — this panel
+          intentionally has no save form for it, since the ingestion client only ever reads the env var.
+        </p>
+      ) : (
+        <form action={formAction} className="mt-3 flex items-center gap-2">
+          <input type="hidden" name="service" value={integration.service} />
+          <input
+            type="password"
+            name="value"
+            placeholder={integration.isConfigured ? "Rotate credential…" : "Paste credential…"}
+            autoComplete="off"
+            className="w-72 max-w-full rounded-md border border-neutral-700 bg-neutral-900 px-2 py-1.5 text-sm text-white outline-none focus:border-neutral-400"
+          />
+          <button
+            type="submit"
+            disabled={pending}
+            className="focus-ring rounded-md bg-white px-3 py-1.5 text-xs font-semibold text-black disabled:opacity-50"
+          >
+            {pending ? "Saving…" : "Save"}
+          </button>
+          {state.error ? <span className="text-xs text-accent-short">{state.error}</span> : null}
+          {state.success ? <span className="text-xs text-accent-long">Saved.</span> : null}
+        </form>
+      )}
     </div>
   );
 }

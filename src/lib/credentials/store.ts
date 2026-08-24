@@ -25,7 +25,8 @@ export const INTEGRATION_CATALOG: Record<
   },
   SEC_EDGAR: {
     displayName: "SEC EDGAR",
-    purpose: "Filings feed for the Accounting/Financial Change Hunter.",
+    purpose:
+      "Filings feed for the Accounting/Financial Change Hunter. No API key — set PMNTX_SEC_EDGAR_CONTACT_EMAIL as an environment variable instead of saving a value below (SEC requires a contact email in the User-Agent header, not a credential).",
   },
   FRED: {
     displayName: "FRED / ALFRED",
