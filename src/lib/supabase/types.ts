@@ -438,6 +438,102 @@ export type Database = {
         };
         Relationships: [];
       };
+      prompt_templates: {
+        Row: { id: string; code: string; role_code: string; description: string | null; created_at: string };
+        Insert: { id?: string; code: string; role_code: string; description?: string | null; created_at?: string };
+        Update: { id?: string; code?: string; role_code?: string; description?: string | null; created_at?: string };
+        Relationships: [];
+      };
+      prompt_versions: {
+        Row: {
+          id: string;
+          prompt_template_id: string;
+          version: string;
+          content: string;
+          content_hash: string;
+          created_at: string;
+          activated_at: string | null;
+          retired_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          prompt_template_id: string;
+          version: string;
+          content: string;
+          content_hash: string;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          prompt_template_id?: string;
+          version?: string;
+          content?: string;
+          content_hash?: string;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Relationships: [];
+      };
+      blind_analyses: {
+        Row: {
+          id: string;
+          security_id: string;
+          research_run_id: string;
+          ai_execution_id: string | null;
+          provider_code: string;
+          model_code: string;
+          prompt_version_id: string | null;
+          anonymized_packet: unknown;
+          recommendation: IdeaDirection | null;
+          probabilities: unknown;
+          reasoning: string | null;
+          risk_factors: string | null;
+          forecast_horizons_supported: string[] | null;
+          confidence: number | null;
+          frozen_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          security_id: string;
+          research_run_id: string;
+          ai_execution_id?: string | null;
+          provider_code: string;
+          model_code: string;
+          prompt_version_id?: string | null;
+          anonymized_packet: unknown;
+          recommendation?: IdeaDirection | null;
+          probabilities?: unknown;
+          reasoning?: string | null;
+          risk_factors?: string | null;
+          forecast_horizons_supported?: string[] | null;
+          confidence?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          security_id?: string;
+          research_run_id?: string;
+          ai_execution_id?: string | null;
+          provider_code?: string;
+          model_code?: string;
+          prompt_version_id?: string | null;
+          anonymized_packet?: unknown;
+          recommendation?: IdeaDirection | null;
+          probabilities?: unknown;
+          reasoning?: string | null;
+          risk_factors?: string | null;
+          forecast_horizons_supported?: string[] | null;
+          confidence?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       securities: {
         Row: {
           id: string;

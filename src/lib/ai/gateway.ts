@@ -40,6 +40,8 @@ export type AiGatewayRequest = {
   context?: AiGatewayContext;
   /** Caller-computed fingerprint (see computeRequestFingerprint) for duplicate suppression within a research run. */
   fingerprint?: string;
+  /** prompt_versions.id for the prompt actually used — recorded on ai_executions for provenance. */
+  promptVersionId?: string;
 };
 
 export type AiGatewayBlockReason =
@@ -223,7 +225,7 @@ async function sumWorkflowTokens(
  */
 export async function requestAiCompletion(input: AiGatewayRequest): Promise<AiGatewayResult> {
   const supabase = createServiceRoleClient();
-  const { role, request, context = {}, fingerprint } = input;
+  const { role, request, context = {}, fingerprint, promptVersionId } = input;
 
   // 1. Global kill switch.
   const { data: controls } = await supabase
@@ -386,6 +388,7 @@ export async function requestAiCompletion(input: AiGatewayRequest): Promise<AiGa
         agent_id: context.agentId,
         security_id: context.securityId,
         workflow_id: context.workflowId,
+      prompt_version_id: promptVersionId,
       });
       return { status: "BLOCKED", reason: "TIME_LIMIT", message: `STOPPED — TIME LIMIT (exceeded ${limits.max_execution_time_seconds}s).` };
     }
@@ -420,6 +423,7 @@ export async function requestAiCompletion(input: AiGatewayRequest): Promise<AiGa
       agent_id: context.agentId,
       security_id: context.securityId,
       workflow_id: context.workflowId,
+      prompt_version_id: promptVersionId,
     });
     return { status: "BLOCKED", reason: "RETRY_LIMIT", message: `STOPPED — RETRY LIMIT (${attempt} attempts): ${errorMessage}` };
   }
@@ -446,6 +450,7 @@ export async function requestAiCompletion(input: AiGatewayRequest): Promise<AiGa
       agent_id: context.agentId,
       security_id: context.securityId,
       workflow_id: context.workflowId,
+      prompt_version_id: promptVersionId,
     })
     .select("id")
     .single();
