@@ -73,7 +73,31 @@ The Accounts and Trading product also exposes: place order, replace order, cance
 5. Click **Connect** in Admin — this starts the OAuth flow; you'll authenticate directly with Schwab, never with PMNTx.
 6. PMNTx stores the resulting tokens encrypted, and will prompt for reauthorization automatically once the 7-day refresh window is at risk of lapsing.
 
-## 9. Sources
+## 9. Real account validation — DEFERRED
+
+As of this writing, **no real Schwab account has been connected to PMNTx.** Everything in §§1-9 is implemented and has been exercised against mocked/fixture HTTP responses only (`schwab_validation_runs` records these as `MOCK` per component — see Admin → System → Schwab for the live status grid). This is a deliberate, intermediate state, not an error: the read-only integration (OAuth, market data, account data) and the `SchwabBrokerProvider` execution-policy framework were both built and tested without requiring the user's real account, per an explicit build directive. Nothing below should be started until the user decides to connect a real account in a separate, later step.
+
+### What real-account validation will require
+
+1. **A registered Schwab developer app**, "Ready for Use" status (see §2 — a few days of manual review after registration).
+2. **Client ID and Client Secret** entered via **Admin → System → Schwab** (never in chat, never committed to Git — the existing encrypted-credential-storage path already built handles this).
+3. **The callback URL registered exactly**: `${NEXT_PUBLIC_APP_URL}/api/schwab/callback`, matching what's registered in the Schwab Developer Portal (§8).
+4. **Account authorization**: clicking Connect in Admin starts the real OAuth flow; the user authenticates directly with Schwab (never with PMNTx), and Schwab redirects back with an authorization code that PMNTx exchanges for tokens.
+
+### What "LIVE-VALIDATED" means and how it's guaranteed honest
+
+`schwab_validation_runs.mode = 'LIVE'` is written only from inside the three genuine production entry points — the OAuth callback route, the Admin "Sync accounts" action, and the market-data ingestion router (see `src/lib/integrations/schwab/live-context.ts`) — via an `AsyncLocalStorage` context that a test script calling the provider functions directly never enters. A mock/fixture test can call `exchangeCodeForTokens`, `getQuotes`, `syncAccounts`, etc. directly and get `PASSED`/`FAILED` results, but it structurally cannot cause a `LIVE` row to be written, because it never runs inside that context. This was verified directly: a first draft of the OAuth/market-data/account-data mock harness did (accidentally, before this guard existed) write real `LIVE` rows purely by calling the shared provider functions with a mocked `fetch` — that gap is exactly what `live-context.ts` closes, and the fixed harness now asserts as a permanent regression check that a fully-mocked run writes zero `LIVE` rows.
+
+### Tests to run once a real account is connected
+
+- **OAuth**: real authorize-URL redirect, real consent screen, real callback with a real authorization code, real token exchange, confirm `schwab_connection.status` becomes `CONNECTED` with real (encrypted) tokens, confirm the ~30 min access / ~7 day refresh lifetimes hold, force a real refresh near expiry, confirm reauthorization is correctly required once the 7-day refresh window lapses, confirm Disconnect revokes PMNTx's local session.
+- **Market data**: real quotes for a handful of liquid, well-known symbols, confirm bid/ask/last/volume/timestamp look sane against a second real source, confirm freshness classifies as LIVE during market hours and DELAYED/STALE appropriately outside them, real daily price history for at least one symbol.
+- **Account data**: real account discovery (masked correctly — only last 4 digits ever visible in PMNTx), real balances/buying power/positions for the connected account(s), confirm figures match Schwab's own UI at time of sync.
+- **Broker/execution layer** (once `SchwabBrokerProvider` exists — see `docs/NEXT_PHASE.md`): PAPER mode against the real market-data feed but never a real order; only after extensive PAPER-mode validation would STAGED/HUMAN_APPROVAL modes be considered, and only with explicit, separate user approval — this document does not authorize that step.
+
+None of the above should be attempted without the user explicitly initiating it in a later, separate session.
+
+## 10. Sources
 
 - [Charles Schwab Developer Portal](https://developer.schwab.com/) (portal itself blocks automated fetches; used for product/registration facts corroborated elsewhere)
 - [schwab-py — Authentication and Client Creation](https://schwab-py.readthedocs.io/en/latest/auth.html)

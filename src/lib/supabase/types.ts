@@ -67,6 +67,9 @@ export type RedTeamSeverity = "LOW" | "MEDIUM" | "HIGH";
 export type RiskRecommendation = "APPROVE" | "APPROVE_SMALLER" | "WATCH" | "DO_NOT_ADD";
 
 export type SchwabConnectionStatus = "DISCONNECTED" | "CONNECTED" | "EXPIRED" | "ERROR";
+export type SchwabValidationComponentEnum = "OAUTH" | "MARKET_DATA" | "ACCOUNT_DATA";
+export type SchwabValidationModeEnum = "MOCK" | "LIVE";
+export type SchwabValidationResultEnum = "PASSED" | "FAILED";
 
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
@@ -311,6 +314,33 @@ export type Database = {
           security_id?: string | null;
           workflow_id?: string | null;
           retries?: number;
+        };
+        Relationships: [];
+      };
+      schwab_validation_runs: {
+        Row: {
+          id: string;
+          component: SchwabValidationComponentEnum;
+          mode: SchwabValidationModeEnum;
+          result: SchwabValidationResultEnum;
+          detail: unknown;
+          run_at: string;
+        };
+        Insert: {
+          id?: string;
+          component: SchwabValidationComponentEnum;
+          mode: SchwabValidationModeEnum;
+          result: SchwabValidationResultEnum;
+          detail?: unknown;
+          run_at?: string;
+        };
+        Update: {
+          id?: string;
+          component?: SchwabValidationComponentEnum;
+          mode?: SchwabValidationModeEnum;
+          result?: SchwabValidationResultEnum;
+          detail?: unknown;
+          run_at?: string;
         };
         Relationships: [];
       };
@@ -1781,6 +1811,9 @@ export type Database = {
       red_team_severity: RedTeamSeverity;
       risk_recommendation: RiskRecommendation;
       schwab_connection_status: SchwabConnectionStatus;
+      schwab_validation_component: SchwabValidationComponentEnum;
+      schwab_validation_mode: SchwabValidationModeEnum;
+      schwab_validation_result: SchwabValidationResultEnum;
     };
   };
 };

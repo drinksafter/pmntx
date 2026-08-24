@@ -5,6 +5,14 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import type { SchwabConnectionStatus } from "@/lib/supabase/types";
 
 import { REFRESH_TOKEN_LIFETIME_SECONDS, SCHWAB_AUTH_BASE_URL } from "./config";
+import { isLiveSchwabInvocation } from "./live-context";
+import { recordValidation } from "./validation";
+
+/** Records a LIVE validation outcome only when reached through a genuine production entry point — see live-context.ts. */
+async function recordLiveOauth(result: "PASSED" | "FAILED", detail?: Record<string, unknown>): Promise<void> {
+  if (!isLiveSchwabInvocation()) return;
+  await recordValidation("OAUTH", "LIVE", result, detail);
+}
 
 export type SchwabConnectionSummary = {
   status: SchwabConnectionStatus;
@@ -70,8 +78,15 @@ async function loadClientCredentials(): Promise<{ clientId: string; clientSecret
   };
 }
 
-/** Builds the URL to redirect the admin's browser to for Schwab's hosted login/consent page. Throws if Client ID isn't configured yet. */
-export async function buildAuthorizationUrl(redirectUri: string): Promise<string> {
+/**
+ * Builds the URL to redirect the admin's browser to for Schwab's hosted
+ * login/consent page. Throws if Client ID isn't configured yet. `state`
+ * is the CSRF-protection nonce — the caller generates it, stores it
+ * server-side (a short-lived cookie; see src/app/api/schwab/authorize),
+ * and must verify the callback's `state` query param matches before
+ * trusting the returned authorization code.
+ */
+export async function buildAuthorizationUrl(redirectUri: string, state: string): Promise<string> {
   const credentials = await loadClientCredentials();
   if (!credentials) {
     throw new Error("Schwab Client ID/Secret are not configured yet — set them in Admin → System → Schwab first.");
@@ -81,6 +96,7 @@ export async function buildAuthorizationUrl(redirectUri: string): Promise<string
   url.searchParams.set("client_id", credentials.clientId);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
+  url.searchParams.set("state", state);
   return url.toString();
 }
 
@@ -114,6 +130,7 @@ export async function exchangeCodeForTokens(code: string, redirectUri: string, a
   } catch (err) {
     const message = err instanceof Error ? err.message : "Network error during token exchange.";
     await recordError(message);
+    await recordLiveOauth("FAILED", { stage: "exchange", message });
     throw new Error(message);
   }
 
@@ -121,6 +138,7 @@ export async function exchangeCodeForTokens(code: string, redirectUri: string, a
     const body = await response.text();
     const message = `Schwab token exchange failed: HTTP ${response.status} ${body.slice(0, 300)}`;
     await recordError(message);
+    await recordLiveOauth("FAILED", { stage: "exchange", status: response.status });
     throw new Error(message);
   }
 
@@ -143,6 +161,8 @@ export async function exchangeCodeForTokens(code: string, redirectUri: string, a
     })
     .eq("id", true);
   if (error) throw error;
+
+  await recordLiveOauth("PASSED", { stage: "exchange" });
 }
 
 /**
@@ -189,7 +209,9 @@ export async function getValidAccessToken(): Promise<string | null> {
       body: new URLSearchParams({ grant_type: "refresh_token", refresh_token: refreshToken }).toString(),
     });
   } catch (err) {
-    await recordError(err instanceof Error ? err.message : "Network error during token refresh.");
+    const message = err instanceof Error ? err.message : "Network error during token refresh.";
+    await recordError(message);
+    await recordLiveOauth("FAILED", { stage: "refresh", message });
     return null;
   }
 
@@ -197,6 +219,7 @@ export async function getValidAccessToken(): Promise<string | null> {
     const body = await response.text();
     await recordError(`Schwab token refresh failed: HTTP ${response.status} ${body.slice(0, 300)}`);
     await supabase.from("schwab_connection").update({ status: "ERROR" }).eq("id", true);
+    await recordLiveOauth("FAILED", { stage: "refresh", status: response.status });
     return null;
   }
 
@@ -218,6 +241,7 @@ export async function getValidAccessToken(): Promise<string | null> {
     })
     .eq("id", true);
 
+  await recordLiveOauth("PASSED", { stage: "refresh" });
   return tokens.access_token;
 }
 

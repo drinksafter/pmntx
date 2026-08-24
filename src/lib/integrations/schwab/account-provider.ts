@@ -5,8 +5,16 @@ import { getOrCreateSecurityByTicker } from "@/lib/ingestion/securities";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 import { SCHWAB_API_BASE_URL } from "./config";
+import { isLiveSchwabInvocation } from "./live-context";
 import { maskAccountNumber } from "./masking";
 import { getValidAccessToken } from "./oauth";
+import { recordValidation } from "./validation";
+
+/** Records a LIVE validation outcome only when reached through a genuine production entry point — see live-context.ts. */
+async function recordLiveAccountData(result: "PASSED" | "FAILED", detail?: Record<string, unknown>): Promise<void> {
+  if (!isLiveSchwabInvocation()) return;
+  await recordValidation("ACCOUNT_DATA", "LIVE", result, detail);
+}
 
 // Endpoint paths follow the commonly-documented Schwab Trader API
 // accounts/trading shape (trader/v1/accounts...) — see the same
@@ -84,9 +92,12 @@ export const SchwabAccountProvider = {
         accountsSynced += 1;
       }
 
+      await recordLiveAccountData("PASSED", { accountsSynced });
       return { status: "OK", accountsSynced };
     } catch (err) {
-      return { status: "ERROR", message: err instanceof Error ? err.message : "Unknown Schwab account sync error." };
+      const message = err instanceof Error ? err.message : "Unknown Schwab account sync error.";
+      await recordLiveAccountData("FAILED", { message });
+      return { status: "ERROR", message };
     }
   },
 };

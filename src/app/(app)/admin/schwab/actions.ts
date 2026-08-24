@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireAdmin } from "@/lib/auth/session";
 import { disconnect, saveClientCredentials } from "@/lib/integrations/schwab/oauth";
 import { SchwabAccountProvider } from "@/lib/integrations/schwab/account-provider";
+import { runAsLiveSchwabCall } from "@/lib/integrations/schwab/live-context";
 
 export type SchwabActionState = { error: string | null; success?: boolean };
 
@@ -42,7 +43,7 @@ export async function syncSchwabAccountsAction(
 ): Promise<SchwabActionState> {
   await requireAdmin();
 
-  const result = await SchwabAccountProvider.syncAccounts();
+  const result = await runAsLiveSchwabCall(() => SchwabAccountProvider.syncAccounts());
   revalidatePath("/admin/schwab");
 
   if (result.status === "NOT_CONFIGURED") {

@@ -6,7 +6,15 @@ import { completeIngestionRun, startIngestionRun } from "@/lib/ingestion/runs";
 import type { IngestionOutcome } from "@/lib/ingestion/types";
 
 import { SCHWAB_API_BASE_URL } from "./config";
+import { isLiveSchwabInvocation } from "./live-context";
 import { getValidAccessToken } from "./oauth";
+import { recordValidation } from "./validation";
+
+/** Records a LIVE validation outcome only when reached through a genuine production entry point — see live-context.ts. */
+async function recordLiveMarketData(result: "PASSED" | "FAILED", detail?: Record<string, unknown>): Promise<void> {
+  if (!isLiveSchwabInvocation()) return;
+  await recordValidation("MARKET_DATA", "LIVE", result, detail);
+}
 
 // Endpoint paths below follow the commonly-documented Schwab Trader API
 // market-data shape (marketdata/v1/...) per docs/SCHWAB_INTEGRATION.md —
@@ -84,6 +92,7 @@ export const SchwabMarketDataProvider = {
 
     const status = failures.length === 0 ? "SUCCEEDED" : recordsIngested > 0 ? "PARTIAL" : "FAILED";
     await completeIngestionRun(runId, status, recordsIngested, failures.join("; ") || undefined);
+    await recordLiveMarketData(status === "FAILED" ? "FAILED" : "PASSED", { stage: "quotes", recordsIngested, failures });
     return { status, recordsIngested, errorMessage: failures.join("; ") || undefined };
   },
 
@@ -104,6 +113,7 @@ export const SchwabMarketDataProvider = {
       const candles = data.candles ?? [];
       if (candles.length === 0) {
         await completeIngestionRun(runId, "FAILED", 0, "No candles returned.");
+        await recordLiveMarketData("FAILED", { stage: "price_history", symbol, reason: "no candles" });
         return { status: "FAILED", recordsIngested: 0, errorMessage: "No candles returned." };
       }
 
@@ -128,10 +138,12 @@ export const SchwabMarketDataProvider = {
       }
 
       await completeIngestionRun(runId, "SUCCEEDED", recordsIngested);
+      await recordLiveMarketData("PASSED", { stage: "price_history", symbol, recordsIngested });
       return { status: "SUCCEEDED", recordsIngested };
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : "Unknown Schwab price history error.";
       await completeIngestionRun(runId, "FAILED", 0, errorMessage);
+      await recordLiveMarketData("FAILED", { stage: "price_history", symbol, message: errorMessage });
       return { status: "FAILED", recordsIngested: 0, errorMessage };
     }
   },

@@ -3,6 +3,7 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/auth/session";
 import { listAccountSummaries } from "@/lib/integrations/schwab/account-provider";
 import { getConnectionSummary } from "@/lib/integrations/schwab/oauth";
+import { getValidationStatus } from "@/lib/integrations/schwab/validation";
 
 import { disconnectSchwabAction } from "./actions";
 import { ClientCredentialsForm } from "./client-credentials-form";
@@ -13,6 +14,12 @@ const STATUS_STYLES: Record<string, string> = {
   DISCONNECTED: "text-neutral-500 border-neutral-700",
   EXPIRED: "text-accent-watch border-accent-watch/40",
   ERROR: "text-accent-short border-accent-short/40",
+};
+
+const COMPONENT_LABELS: Record<string, string> = {
+  OAUTH: "OAuth",
+  MARKET_DATA: "Market data",
+  ACCOUNT_DATA: "Account data",
 };
 
 function formatDate(iso: string | null): string {
@@ -32,7 +39,11 @@ export default async function SchwabAdminPage({
 }) {
   await requireAdmin();
   const params = await searchParams;
-  const [connection, accounts] = await Promise.all([getConnectionSummary(), listAccountSummaries()]);
+  const [connection, accounts, validation] = await Promise.all([
+    getConnectionSummary(),
+    listAccountSummaries(),
+    getValidationStatus(),
+  ]);
 
   const marketDataCapable = connection.status === "CONNECTED";
   const accountReadCapable = connection.status === "CONNECTED" && accounts.length > 0;
@@ -129,6 +140,60 @@ export default async function SchwabAdminPage({
             <dd className="font-mono text-neutral-300">{formatDate(connection.lastAccountDataRequestAt)}</dd>
           </div>
         </dl>
+      </div>
+
+      <div className="mb-6 rounded-lg border border-border p-4">
+        <h2 className="mb-3 font-mono text-sm font-bold">VALIDATION STATUS</h2>
+        <p className="mb-3 text-xs text-neutral-500">
+          Distinguishes what&apos;s built from what&apos;s actually been proven. A mocked test can never
+          set LIVE status — only a real successful call to Schwab&apos;s servers can.
+        </p>
+        <div className="mb-3 flex items-center justify-between rounded border border-border px-3 py-2 text-xs">
+          <span>Integration implemented</span>
+          <span className="font-mono text-accent-long">YES</span>
+        </div>
+        <div className="mb-3 flex items-center justify-between rounded border border-border px-3 py-2 text-xs">
+          <span>Real account connected</span>
+          <span className={`font-mono ${connection.status === "CONNECTED" ? "text-accent-long" : "text-accent-short"}`}>
+            {connection.status === "CONNECTED" ? "YES" : "NO"}
+          </span>
+        </div>
+        <div className="tablewrap overflow-x-auto rounded border border-border">
+          <table className="w-full text-left text-xs">
+            <thead>
+              <tr className="border-b border-border text-neutral-500">
+                <th className="px-3 py-2 font-normal">Component</th>
+                <th className="px-3 py-2 font-normal">Mock-validated</th>
+                <th className="px-3 py-2 font-normal">Live-validated</th>
+              </tr>
+            </thead>
+            <tbody>
+              {validation.map((v) => (
+                <tr key={v.component} className="border-b border-border last:border-b-0">
+                  <td className="px-3 py-2 font-mono">{COMPONENT_LABELS[v.component]}</td>
+                  <td className="px-3 py-2">
+                    {v.mockValidated ? (
+                      <span className={v.mockValidated.result === "PASSED" ? "text-accent-long" : "text-accent-short"}>
+                        {v.mockValidated.result} <span className="text-neutral-600">({formatDate(v.mockValidated.at)})</span>
+                      </span>
+                    ) : (
+                      <span className="text-neutral-500">not run</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    {v.liveValidated ? (
+                      <span className={v.liveValidated.result === "PASSED" ? "text-accent-long" : "text-accent-short"}>
+                        {v.liveValidated.result} <span className="text-neutral-600">({formatDate(v.liveValidated.at)})</span>
+                      </span>
+                    ) : (
+                      <span className="font-mono text-accent-watch">NOT COMPLETED</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <div className="mb-6 rounded-lg border border-border p-4">

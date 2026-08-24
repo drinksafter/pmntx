@@ -2,6 +2,7 @@ import "server-only";
 
 import { getConnectionSummary } from "@/lib/integrations/schwab/oauth";
 import { SchwabMarketDataProvider } from "@/lib/integrations/schwab/market-data-provider";
+import { runAsLiveSchwabCall } from "@/lib/integrations/schwab/live-context";
 import type { IngestionOutcome } from "@/lib/ingestion/types";
 
 import { ingestMarketPrices } from "./providers/market-data";
@@ -23,12 +24,14 @@ export async function ingestDailyReferencePrices(tickers: string[]): Promise<Ing
   if (schwabConnection.status === "CONNECTED") {
     let recordsIngested = 0;
     const failures: string[] = [];
-    for (const ticker of tickers) {
-      const result = await SchwabMarketDataProvider.getDailyPriceHistory(ticker);
-      if (result.status === "NOT_CONFIGURED") break; // connection dropped mid-loop — fall through to Alpha Vantage for everything
-      recordsIngested += result.recordsIngested;
-      if (result.errorMessage) failures.push(`${ticker}: ${result.errorMessage}`);
-    }
+    await runAsLiveSchwabCall(async () => {
+      for (const ticker of tickers) {
+        const result = await SchwabMarketDataProvider.getDailyPriceHistory(ticker);
+        if (result.status === "NOT_CONFIGURED") break; // connection dropped mid-loop — fall through to Alpha Vantage for everything
+        recordsIngested += result.recordsIngested;
+        if (result.errorMessage) failures.push(`${ticker}: ${result.errorMessage}`);
+      }
+    });
     if (recordsIngested > 0 || failures.length > 0) {
       return {
         status: failures.length === 0 ? "SUCCEEDED" : recordsIngested > 0 ? "PARTIAL" : "FAILED",
