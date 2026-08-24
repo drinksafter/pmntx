@@ -39,3 +39,25 @@ export async function getOrCreateSecurityByTicker(ticker: string): Promise<strin
 
   return created.id;
 }
+
+/**
+ * Looks up a security by CIK, for sources (SEC EDGAR) keyed by CIK rather
+ * than ticker. Returns null rather than creating a row — unlike
+ * getOrCreateSecurityByTicker, we have no ticker/name to create a useful
+ * placeholder with, and Phase 1A has no CIK<->ticker crosswalk ingestion
+ * yet (see src/lib/hunters/accounting-financial-change.ts). Callers should
+ * skip records that don't resolve rather than fail the whole run.
+ */
+export async function getSecurityIdByCik(cik: string): Promise<string | null> {
+  const supabase = createServiceRoleClient();
+  const normalized = cik.replace(/\D/g, "").padStart(10, "0");
+
+  const { data } = await supabase
+    .from("securities")
+    .select("id")
+    .eq("cik", normalized)
+    .order("created_at", { ascending: true })
+    .limit(1);
+
+  return data && data.length > 0 ? data[0].id : null;
+}

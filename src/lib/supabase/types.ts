@@ -33,6 +33,8 @@ export type SecurityType = "EQUITY" | "ETF" | "ADR" | "OTHER";
 export type IngestionStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 export type IngestionTrigger = "SCHEDULED" | "MANUAL";
 
+export type SignalDirection = "BULLISH" | "BEARISH" | "NEUTRAL";
+
 export type Database = {
   public: {
     Tables: {
@@ -465,6 +467,114 @@ export type Database = {
         };
         Relationships: [];
       };
+      hunter_definitions: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          category: string;
+          description: string | null;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          category: string;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          category?: string;
+          description?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      hunter_versions: {
+        Row: {
+          id: string;
+          hunter_definition_id: string;
+          version: string;
+          config: unknown;
+          created_at: string;
+          activated_at: string | null;
+          retired_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          hunter_definition_id: string;
+          version: string;
+          config?: unknown;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          hunter_definition_id?: string;
+          version?: string;
+          config?: unknown;
+          created_at?: string;
+          activated_at?: string | null;
+          retired_at?: string | null;
+        };
+        Relationships: [];
+      };
+      hunter_results: {
+        Row: {
+          id: string;
+          hunter_version_id: string;
+          security_id: string;
+          as_of_date: string;
+          signal_direction: SignalDirection;
+          raw_value: number | null;
+          normalized_score: number;
+          confidence: number;
+          data_quality: number;
+          evidence: unknown;
+          explanation: string | null;
+          source_record_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          hunter_version_id: string;
+          security_id: string;
+          as_of_date: string;
+          signal_direction: SignalDirection;
+          raw_value?: number | null;
+          normalized_score: number;
+          confidence: number;
+          data_quality: number;
+          evidence?: unknown;
+          explanation?: string | null;
+          source_record_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          hunter_version_id?: string;
+          security_id?: string;
+          as_of_date?: string;
+          signal_direction?: SignalDirection;
+          raw_value?: number | null;
+          normalized_score?: number;
+          confidence?: number;
+          data_quality?: number;
+          evidence?: unknown;
+          explanation?: string | null;
+          source_record_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -476,6 +586,7 @@ export type Database = {
       security_type: SecurityType;
       ingestion_status: IngestionStatus;
       ingestion_trigger: IngestionTrigger;
+      signal_direction: SignalDirection;
     };
   };
 };
