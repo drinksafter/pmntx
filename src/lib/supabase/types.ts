@@ -71,6 +71,34 @@ export type SchwabValidationComponentEnum = "OAUTH" | "MARKET_DATA" | "ACCOUNT_D
 export type SchwabValidationModeEnum = "MOCK" | "LIVE";
 export type SchwabValidationResultEnum = "PASSED" | "FAILED";
 
+export type BrokerExecutionMode = "READ_ONLY" | "PAPER" | "STAGED" | "HUMAN_APPROVAL" | "GUARDED_AUTO";
+export type ProposedTradeSide = "BUY" | "SELL";
+export type ProposedTradeOrderType = "MARKET" | "LIMIT";
+export type ProposedTradeStatus =
+  | "PROPOSED"
+  | "RISK_REVIEWED"
+  | "POLICY_REVIEWED"
+  | "PENDING_APPROVAL"
+  | "APPROVED"
+  | "REJECTED"
+  | "STAGED"
+  | "FILLED_PAPER"
+  | "CANCELLED"
+  | "INVALIDATED"
+  | "EXPIRED";
+export type ProposedTradeEventType =
+  | "CREATED"
+  | "RISK_REVIEWED"
+  | "POLICY_REVIEWED"
+  | "APPROVAL_REQUESTED"
+  | "APPROVED"
+  | "REJECTED"
+  | "INVALIDATED"
+  | "STAGED"
+  | "FILLED_PAPER"
+  | "CANCELLED"
+  | "EXECUTION_BLOCKED";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -1787,6 +1815,150 @@ export type Database = {
         };
         Relationships: [];
       };
+      broker_system_controls: {
+        Row: {
+          id: boolean;
+          mode: BrokerExecutionMode;
+          execution_enabled: boolean;
+          close_only_mode: boolean;
+          guarded_auto_unlocked: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: boolean;
+          mode?: BrokerExecutionMode;
+          execution_enabled?: boolean;
+          close_only_mode?: boolean;
+          guarded_auto_unlocked?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: boolean;
+          mode?: BrokerExecutionMode;
+          execution_enabled?: boolean;
+          close_only_mode?: boolean;
+          guarded_auto_unlocked?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      proposed_trades: {
+        Row: {
+          id: string;
+          prediction_id: string | null;
+          rationale: string | null;
+          security_id: string;
+          side: ProposedTradeSide;
+          order_type: ProposedTradeOrderType;
+          quantity: number;
+          limit_price: number | null;
+          execution_mode: BrokerExecutionMode;
+          status: ProposedTradeStatus;
+          fingerprint: string;
+          risk_review_passed: boolean | null;
+          risk_review_detail: unknown;
+          policy_review_passed: boolean | null;
+          policy_review_detail: unknown;
+          approved_by: string | null;
+          approved_at: string | null;
+          approval_invalidated_at: string | null;
+          approval_invalidated_reason: string | null;
+          staged_at: string | null;
+          filled_paper_at: string | null;
+          filled_paper_price: number | null;
+          cancelled_at: string | null;
+          cancelled_reason: string | null;
+          reviewed_against_quote_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prediction_id?: string | null;
+          rationale?: string | null;
+          security_id: string;
+          side: ProposedTradeSide;
+          order_type?: ProposedTradeOrderType;
+          quantity: number;
+          limit_price?: number | null;
+          execution_mode: BrokerExecutionMode;
+          status?: ProposedTradeStatus;
+          fingerprint: string;
+          risk_review_passed?: boolean | null;
+          risk_review_detail?: unknown;
+          policy_review_passed?: boolean | null;
+          policy_review_detail?: unknown;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          approval_invalidated_at?: string | null;
+          approval_invalidated_reason?: string | null;
+          staged_at?: string | null;
+          filled_paper_at?: string | null;
+          filled_paper_price?: number | null;
+          cancelled_at?: string | null;
+          cancelled_reason?: string | null;
+          reviewed_against_quote_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prediction_id?: string | null;
+          rationale?: string | null;
+          security_id?: string;
+          side?: ProposedTradeSide;
+          order_type?: ProposedTradeOrderType;
+          quantity?: number;
+          limit_price?: number | null;
+          execution_mode?: BrokerExecutionMode;
+          status?: ProposedTradeStatus;
+          fingerprint?: string;
+          risk_review_passed?: boolean | null;
+          risk_review_detail?: unknown;
+          policy_review_passed?: boolean | null;
+          policy_review_detail?: unknown;
+          approved_by?: string | null;
+          approved_at?: string | null;
+          approval_invalidated_at?: string | null;
+          approval_invalidated_reason?: string | null;
+          staged_at?: string | null;
+          filled_paper_at?: string | null;
+          filled_paper_price?: number | null;
+          cancelled_at?: string | null;
+          cancelled_reason?: string | null;
+          reviewed_against_quote_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      proposed_trade_events: {
+        Row: {
+          id: string;
+          proposed_trade_id: string;
+          event_type: ProposedTradeEventType;
+          detail: unknown;
+          actor: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          proposed_trade_id: string;
+          event_type: ProposedTradeEventType;
+          detail?: unknown;
+          actor?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          proposed_trade_id?: string;
+          event_type?: ProposedTradeEventType;
+          detail?: unknown;
+          actor?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -1814,6 +1986,11 @@ export type Database = {
       schwab_validation_component: SchwabValidationComponentEnum;
       schwab_validation_mode: SchwabValidationModeEnum;
       schwab_validation_result: SchwabValidationResultEnum;
+      broker_execution_mode: BrokerExecutionMode;
+      proposed_trade_side: ProposedTradeSide;
+      proposed_trade_order_type: ProposedTradeOrderType;
+      proposed_trade_status: ProposedTradeStatus;
+      proposed_trade_event_type: ProposedTradeEventType;
     };
   };
 };
