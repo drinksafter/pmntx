@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { setPaidAiKillSwitchAction } from "@/lib/ai/budget-actions";
+import { BRAND_NAME } from "@/lib/branding";
 
 export function KillSwitch({ enabled, reason }: { enabled: boolean; reason: string | null }) {
   const [showConfirm, setShowConfirm] = useState(false);
@@ -31,7 +32,8 @@ export function KillSwitch({ enabled, reason }: { enabled: boolean; reason: stri
         <div>
           <p className="font-mono text-sm font-semibold">Paid AI is enabled</p>
           <p className="mt-1 text-xs text-neutral-500">
-            Deterministic PMNTX (ingestion, Hunters, ranking) is unaffected by this switch either way.
+            Deterministic {BRAND_NAME} (ingestion, Hunters, ranking) is unaffected by this switch
+            either way.
           </p>
         </div>
         {!showConfirm ? (

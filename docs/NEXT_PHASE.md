@@ -39,6 +39,9 @@ Everything here is explicitly out of scope for Phase 1A per `docs/PHASE_1A_SCOPE
 ## Voice / Telnyx
 - Telnyx voice interaction (the Admin integration card and AI-inference adapter interface ship in Phase 1A; voice itself does not)
 
+## Research media intake
+- Research Media Intake / ResearchContentProvider — a future system for ingesting legally accessible external research content (podcast transcripts, interviews, newsletters, and similar media), extracting speaker/company/theme/stance/forecast information, and preserving source and publication provenance the same way `source_records` does for Phase 1A's structured data sources. Would eventually support measuring a source/speaker's own predictive track record over time. Prof G Markets is one example future source. Not implemented in Phase 1A.
+
 ## UI not required to prove the pipeline
 - Agent Desk (standalone page)
 - Opportunities page (filterable idea browser)

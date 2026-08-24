@@ -1,6 +1,7 @@
 import "server-only";
 
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
+import { BRAND_SUBSYSTEM_NAMES } from "@/lib/branding";
 
 import { composeScore, type HunterContribution } from "./scoring";
 
@@ -42,7 +43,7 @@ export async function runPmntxCoreRanking(asOfDate: string): Promise<PmntxCoreRu
     .single();
 
   if (runError || !run) {
-    throw new Error(`Failed to start PMNTX Core research_run: ${runError?.message}`);
+    throw new Error(`Failed to start ${BRAND_SUBSYSTEM_NAMES.core} research_run: ${runError?.message}`);
   }
 
   try {

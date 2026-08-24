@@ -3,6 +3,7 @@ import "server-only";
 import { computeRequestFingerprint, requestAiCompletion } from "@/lib/ai/gateway";
 import { resolveAiRoute } from "@/lib/ai/router";
 import type { AiRole } from "@/lib/ai/types";
+import { BRAND_SUBSYSTEM_NAMES } from "@/lib/branding";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 import type { IdeaDirection } from "@/lib/supabase/types";
 
@@ -95,7 +96,7 @@ export async function runBlindAnalysisForSecurity(
   if (!run?.frozen_at) {
     throw new Error(
       `Cannot run blind analysis: research_run ${researchRunId} is not frozen yet (independence firewall) — ` +
-        `PMNTX Core must freeze its ranking before any analysis reads it.`
+        `${BRAND_SUBSYSTEM_NAMES.core} must freeze its ranking before any analysis reads it.`
     );
   }
 

@@ -2,6 +2,7 @@ import Link from "next/link";
 
 import { signOut } from "@/lib/auth/actions";
 import type { SessionUser } from "@/lib/auth/session";
+import { BRAND_NAME } from "@/lib/branding";
 
 /**
  * Primary navigation. Trimmed to what Phase 1A actually ships — see
@@ -23,7 +24,7 @@ export function NavShell({
         <div className="mx-auto flex h-12 max-w-7xl items-center justify-between px-4">
           <div className="flex items-center gap-6">
             <Link href="/" className="focus-ring font-mono text-sm font-bold tracking-tight">
-              PMNTX
+              {BRAND_NAME}
             </Link>
             <nav aria-label="Primary" className="flex items-center gap-4 text-sm">
               <Link href="/" className="focus-ring text-neutral-400 hover:text-white">

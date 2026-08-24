@@ -4,6 +4,7 @@ import { useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/client";
+import { BRAND_NAME } from "@/lib/branding";
 
 type LinkStatus = "verifying" | "ready" | "invalid";
 
@@ -129,7 +130,9 @@ export default function SetPasswordPage() {
           </p>
         ) : (
           <>
-            <p className="mb-6 text-sm text-neutral-500">Choose a password for your PMNTX account.</p>
+            <p className="mb-6 text-sm text-neutral-500">
+              Choose a password for your {BRAND_NAME} account.
+            </p>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
