@@ -62,6 +62,10 @@ export type ForecastType = "FORECAST" | "NO_FORECAST" | "INSUFFICIENT_EDGE" | "O
 
 export type AgentRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 
+export type OutcomeStatus = "PENDING" | "PARTIALLY_RESOLVED" | "RESOLVED";
+export type RedTeamSeverity = "LOW" | "MEDIUM" | "HIGH";
+export type RiskRecommendation = "APPROVE" | "APPROVE_SMALLER" | "WATCH" | "DO_NOT_ADD";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -737,6 +741,174 @@ export type Database = {
         };
         Relationships: [];
       };
+      prediction_outcomes: {
+        Row: {
+          id: string;
+          prediction_horizon_id: string;
+          status: OutcomeStatus;
+          actual_price: number | null;
+          actual_return: number | null;
+          benchmark_return: number | null;
+          excess_return: number | null;
+          direction_correct: boolean | null;
+          forecast_error: number | null;
+          max_favorable_excursion: number | null;
+          max_adverse_excursion: number | null;
+          resolved_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prediction_horizon_id: string;
+          status?: OutcomeStatus;
+          actual_price?: number | null;
+          actual_return?: number | null;
+          benchmark_return?: number | null;
+          excess_return?: number | null;
+          direction_correct?: boolean | null;
+          forecast_error?: number | null;
+          max_favorable_excursion?: number | null;
+          max_adverse_excursion?: number | null;
+          resolved_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prediction_horizon_id?: string;
+          status?: OutcomeStatus;
+          actual_price?: number | null;
+          actual_return?: number | null;
+          benchmark_return?: number | null;
+          excess_return?: number | null;
+          direction_correct?: boolean | null;
+          forecast_error?: number | null;
+          max_favorable_excursion?: number | null;
+          max_adverse_excursion?: number | null;
+          resolved_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      pmntx_agent_selections: {
+        Row: {
+          id: string;
+          agent_daily_list_id: string;
+          original_agent_rank: number | null;
+          original_agent_score: number | null;
+          pmntx_original_rank: number | null;
+          pmntx_original_score: number | null;
+          pmntx_secondary_score: number | null;
+          pmntx_secondary_recommendation: IdeaDirection | null;
+          evidence_discovered: string | null;
+          approved: boolean;
+          ai_execution_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          agent_daily_list_id: string;
+          original_agent_rank?: number | null;
+          original_agent_score?: number | null;
+          pmntx_original_rank?: number | null;
+          pmntx_original_score?: number | null;
+          pmntx_secondary_score?: number | null;
+          pmntx_secondary_recommendation?: IdeaDirection | null;
+          evidence_discovered?: string | null;
+          approved?: boolean;
+          ai_execution_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          agent_daily_list_id?: string;
+          original_agent_rank?: number | null;
+          original_agent_score?: number | null;
+          pmntx_original_rank?: number | null;
+          pmntx_original_score?: number | null;
+          pmntx_secondary_score?: number | null;
+          pmntx_secondary_recommendation?: IdeaDirection | null;
+          evidence_discovered?: string | null;
+          approved?: boolean;
+          ai_execution_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      red_team_reviews: {
+        Row: {
+          id: string;
+          prediction_id: string;
+          ai_execution_id: string | null;
+          findings: unknown;
+          concerns: string[] | null;
+          severity: RedTeamSeverity | null;
+          summary: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prediction_id: string;
+          ai_execution_id?: string | null;
+          findings?: unknown;
+          concerns?: string[] | null;
+          severity?: RedTeamSeverity | null;
+          summary?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prediction_id?: string;
+          ai_execution_id?: string | null;
+          findings?: unknown;
+          concerns?: string[] | null;
+          severity?: RedTeamSeverity | null;
+          summary?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      consensus_snapshots: {
+        Row: {
+          id: string;
+          security_id: string;
+          run_date: string;
+          systems_count: number;
+          direction_agreement: unknown;
+          probability_dispersion: number | null;
+          score_dispersion: number | null;
+          horizon_agreement: unknown;
+          raw_consensus_score: number | null;
+          independence_adjusted_consensus_score: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          security_id: string;
+          run_date: string;
+          systems_count?: number;
+          direction_agreement?: unknown;
+          probability_dispersion?: number | null;
+          score_dispersion?: number | null;
+          horizon_agreement?: unknown;
+          raw_consensus_score?: number | null;
+          independence_adjusted_consensus_score?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          security_id?: string;
+          run_date?: string;
+          systems_count?: number;
+          direction_agreement?: unknown;
+          probability_dispersion?: number | null;
+          score_dispersion?: number | null;
+          horizon_agreement?: unknown;
+          raw_consensus_score?: number | null;
+          independence_adjusted_consensus_score?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       revealed_analyses: {
         Row: {
           id: string;
@@ -1393,6 +1565,9 @@ export type Database = {
       forecast_horizon: ForecastHorizon;
       forecast_type: ForecastType;
       agent_run_status: AgentRunStatus;
+      outcome_status: OutcomeStatus;
+      red_team_severity: RedTeamSeverity;
+      risk_recommendation: RiskRecommendation;
     };
   };
 };

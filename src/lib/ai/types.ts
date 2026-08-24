@@ -7,7 +7,8 @@ export type AiRole =
   | "REVEALED_ANALYST"
   | "RED_TEAM"
   | "AGENT_BUFFETT"
-  | "AGENT_GERSTNER";
+  | "AGENT_GERSTNER"
+  | "PMNTX_AGENT_SELECTION";
 
 export type AiCompletionRequest = {
   system?: string;
