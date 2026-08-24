@@ -39,6 +39,27 @@ export type ResearchRunOrigin = "PMNTX_CORE" | "AGENT";
 export type ResearchRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 export type IdeaDirection = "LONG" | "SHORT" | "WATCH" | "PASS";
 
+export type IdeaOrigin =
+  | "PMNTX_CORE"
+  | "AGENT_BUFFETT"
+  | "AGENT_GERSTNER"
+  | "AGENT_MILLENNIUM"
+  | "AGENT_CITADEL"
+  | "AGENT_JANE_STREET"
+  | "AGENT_HRT"
+  | "AGENT_OPTIVER"
+  | "AGENT_JUMP"
+  | "AGENT_DRUCKENMILLER"
+  | "AGENT_ARK"
+  | "USER_SECURITY"
+  | "USER_THEME"
+  | "USER_THESIS"
+  | "EDGE_LAB"
+  | "OTHER_SYSTEM";
+
+export type ForecastHorizon = "D1" | "D5" | "D10" | "D21" | "D63" | "D126" | "Y1" | "Y2" | "Y3" | "Y5";
+export type ForecastType = "FORECAST" | "NO_FORECAST" | "INSUFFICIENT_EDGE" | "OUTSIDE_MANDATE";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -530,6 +551,186 @@ export type Database = {
           forecast_horizons_supported?: string[] | null;
           confidence?: number | null;
           frozen_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      ideas: {
+        Row: {
+          id: string;
+          security_id: string;
+          origin: IdeaOrigin;
+          research_run_id: string | null;
+          agent_daily_list_id: string | null;
+          direction: IdeaDirection;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          security_id: string;
+          origin: IdeaOrigin;
+          research_run_id?: string | null;
+          agent_daily_list_id?: string | null;
+          direction: IdeaDirection;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          security_id?: string;
+          origin?: IdeaOrigin;
+          research_run_id?: string | null;
+          agent_daily_list_id?: string | null;
+          direction?: IdeaDirection;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      predictions: {
+        Row: {
+          id: string;
+          idea_id: string;
+          security_id: string;
+          origin: IdeaOrigin;
+          research_run_id: string | null;
+          agent_id: string | null;
+          data_cutoff: string;
+          reference_price: number;
+          reference_price_at: string;
+          direction: IdeaDirection;
+          score: number | null;
+          score_version: string | null;
+          thesis: string | null;
+          catalysts: string | null;
+          risks: string | null;
+          invalidation_criteria: string | null;
+          best_horizon_label: string | null;
+          regime_snapshot_id: string | null;
+          ai_execution_id: string | null;
+          prompt_version_id: string | null;
+          supersedes_prediction_id: string | null;
+          frozen_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          idea_id: string;
+          security_id: string;
+          origin: IdeaOrigin;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          data_cutoff: string;
+          reference_price: number;
+          reference_price_at: string;
+          direction: IdeaDirection;
+          score?: number | null;
+          score_version?: string | null;
+          thesis?: string | null;
+          catalysts?: string | null;
+          risks?: string | null;
+          invalidation_criteria?: string | null;
+          best_horizon_label?: string | null;
+          regime_snapshot_id?: string | null;
+          ai_execution_id?: string | null;
+          prompt_version_id?: string | null;
+          supersedes_prediction_id?: string | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          idea_id?: string;
+          security_id?: string;
+          origin?: IdeaOrigin;
+          research_run_id?: string | null;
+          agent_id?: string | null;
+          data_cutoff?: string;
+          reference_price?: number;
+          reference_price_at?: string;
+          direction?: IdeaDirection;
+          score?: number | null;
+          score_version?: string | null;
+          thesis?: string | null;
+          catalysts?: string | null;
+          risks?: string | null;
+          invalidation_criteria?: string | null;
+          best_horizon_label?: string | null;
+          regime_snapshot_id?: string | null;
+          ai_execution_id?: string | null;
+          prompt_version_id?: string | null;
+          supersedes_prediction_id?: string | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      prediction_horizons: {
+        Row: {
+          id: string;
+          prediction_id: string;
+          horizon: ForecastHorizon;
+          forecast_type: ForecastType;
+          expected_return: number | null;
+          expected_price: number | null;
+          probability_positive: number | null;
+          probability_negative: number | null;
+          probability_outperform_benchmark: number | null;
+          expected_benchmark_relative_return: number | null;
+          bear_range_low: number | null;
+          bear_range_high: number | null;
+          base_range_low: number | null;
+          base_range_high: number | null;
+          bull_range_low: number | null;
+          bull_range_high: number | null;
+          downside_tail_estimate: number | null;
+          confidence: number | null;
+          data_quality: number | null;
+          assumptions: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          prediction_id: string;
+          horizon: ForecastHorizon;
+          forecast_type?: ForecastType;
+          expected_return?: number | null;
+          expected_price?: number | null;
+          probability_positive?: number | null;
+          probability_negative?: number | null;
+          probability_outperform_benchmark?: number | null;
+          expected_benchmark_relative_return?: number | null;
+          bear_range_low?: number | null;
+          bear_range_high?: number | null;
+          base_range_low?: number | null;
+          base_range_high?: number | null;
+          bull_range_low?: number | null;
+          bull_range_high?: number | null;
+          downside_tail_estimate?: number | null;
+          confidence?: number | null;
+          data_quality?: number | null;
+          assumptions?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          prediction_id?: string;
+          horizon?: ForecastHorizon;
+          forecast_type?: ForecastType;
+          expected_return?: number | null;
+          expected_price?: number | null;
+          probability_positive?: number | null;
+          probability_negative?: number | null;
+          probability_outperform_benchmark?: number | null;
+          expected_benchmark_relative_return?: number | null;
+          bear_range_low?: number | null;
+          bear_range_high?: number | null;
+          base_range_low?: number | null;
+          base_range_high?: number | null;
+          bull_range_low?: number | null;
+          bull_range_high?: number | null;
+          downside_tail_estimate?: number | null;
+          confidence?: number | null;
+          data_quality?: number | null;
+          assumptions?: string | null;
           created_at?: string;
         };
         Relationships: [];
@@ -1033,6 +1234,9 @@ export type Database = {
       research_run_status: ResearchRunStatus;
       idea_direction: IdeaDirection;
       ai_budget_event_type: AiBudgetEventType;
+      idea_origin: IdeaOrigin;
+      forecast_horizon: ForecastHorizon;
+      forecast_type: ForecastType;
     };
   };
 };
