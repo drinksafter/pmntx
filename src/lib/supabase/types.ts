@@ -66,6 +66,8 @@ export type OutcomeStatus = "PENDING" | "PARTIALLY_RESOLVED" | "RESOLVED";
 export type RedTeamSeverity = "LOW" | "MEDIUM" | "HIGH";
 export type RiskRecommendation = "APPROVE" | "APPROVE_SMALLER" | "WATCH" | "DO_NOT_ADD";
 
+export type SchwabConnectionStatus = "DISCONNECTED" | "CONNECTED" | "EXPIRED" | "ERROR";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -309,6 +311,216 @@ export type Database = {
           security_id?: string | null;
           workflow_id?: string | null;
           retries?: number;
+        };
+        Relationships: [];
+      };
+      schwab_connection: {
+        Row: {
+          id: boolean;
+          status: SchwabConnectionStatus;
+          encrypted_access_token: string | null;
+          access_token_expires_at: string | null;
+          encrypted_refresh_token: string | null;
+          refresh_token_expires_at: string | null;
+          scope: string | null;
+          connected_at: string | null;
+          connected_by: string | null;
+          last_error: string | null;
+          last_error_at: string | null;
+          last_market_data_request_at: string | null;
+          last_account_data_request_at: string | null;
+          updated_at: string;
+          encrypted_client_id: string | null;
+          encrypted_client_secret: string | null;
+          client_credentials_set_at: string | null;
+          client_credentials_set_by: string | null;
+        };
+        Insert: {
+          id?: boolean;
+          status?: SchwabConnectionStatus;
+          encrypted_access_token?: string | null;
+          access_token_expires_at?: string | null;
+          encrypted_refresh_token?: string | null;
+          refresh_token_expires_at?: string | null;
+          scope?: string | null;
+          connected_at?: string | null;
+          connected_by?: string | null;
+          last_error?: string | null;
+          last_error_at?: string | null;
+          last_market_data_request_at?: string | null;
+          last_account_data_request_at?: string | null;
+          updated_at?: string;
+          encrypted_client_id?: string | null;
+          encrypted_client_secret?: string | null;
+          client_credentials_set_at?: string | null;
+          client_credentials_set_by?: string | null;
+        };
+        Update: {
+          id?: boolean;
+          status?: SchwabConnectionStatus;
+          encrypted_access_token?: string | null;
+          access_token_expires_at?: string | null;
+          encrypted_refresh_token?: string | null;
+          refresh_token_expires_at?: string | null;
+          scope?: string | null;
+          connected_at?: string | null;
+          connected_by?: string | null;
+          last_error?: string | null;
+          last_error_at?: string | null;
+          last_market_data_request_at?: string | null;
+          last_account_data_request_at?: string | null;
+          updated_at?: string;
+          encrypted_client_id?: string | null;
+          encrypted_client_secret?: string | null;
+          client_credentials_set_at?: string | null;
+          client_credentials_set_by?: string | null;
+        };
+        Relationships: [];
+      };
+      schwab_accounts: {
+        Row: {
+          id: string;
+          account_number_masked: string;
+          encrypted_account_hash: string;
+          account_type: string | null;
+          is_active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id?: string;
+          account_number_masked: string;
+          encrypted_account_hash: string;
+          account_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          account_number_masked?: string;
+          encrypted_account_hash?: string;
+          account_type?: string | null;
+          is_active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      schwab_account_snapshots: {
+        Row: {
+          id: string;
+          schwab_account_id: string;
+          as_of: string;
+          cash: number | null;
+          buying_power: number | null;
+          total_value: number | null;
+          raw: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          schwab_account_id: string;
+          as_of?: string;
+          cash?: number | null;
+          buying_power?: number | null;
+          total_value?: number | null;
+          raw?: unknown;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          schwab_account_id?: string;
+          as_of?: string;
+          cash?: number | null;
+          buying_power?: number | null;
+          total_value?: number | null;
+          raw?: unknown;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      schwab_positions: {
+        Row: {
+          id: string;
+          schwab_account_id: string;
+          as_of: string;
+          symbol: string;
+          security_id: string | null;
+          quantity: number;
+          average_cost: number | null;
+          market_value: number | null;
+          raw: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          schwab_account_id: string;
+          as_of?: string;
+          symbol: string;
+          security_id?: string | null;
+          quantity: number;
+          average_cost?: number | null;
+          market_value?: number | null;
+          raw?: unknown;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          schwab_account_id?: string;
+          as_of?: string;
+          symbol?: string;
+          security_id?: string | null;
+          quantity?: number;
+          average_cost?: number | null;
+          market_value?: number | null;
+          raw?: unknown;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      schwab_quotes: {
+        Row: {
+          id: string;
+          symbol: string;
+          security_id: string | null;
+          last_price: number | null;
+          bid: number | null;
+          ask: number | null;
+          volume: number | null;
+          bar_interval: string | null;
+          quote_timestamp: string;
+          received_at: string;
+          raw: unknown;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          symbol: string;
+          security_id?: string | null;
+          last_price?: number | null;
+          bid?: number | null;
+          ask?: number | null;
+          volume?: number | null;
+          bar_interval?: string | null;
+          quote_timestamp: string;
+          received_at?: string;
+          raw?: unknown;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          symbol?: string;
+          security_id?: string | null;
+          last_price?: number | null;
+          bid?: number | null;
+          ask?: number | null;
+          volume?: number | null;
+          bar_interval?: string | null;
+          quote_timestamp?: string;
+          received_at?: string;
+          raw?: unknown;
+          created_at?: string;
         };
         Relationships: [];
       };
@@ -1568,6 +1780,7 @@ export type Database = {
       outcome_status: OutcomeStatus;
       red_team_severity: RedTeamSeverity;
       risk_recommendation: RiskRecommendation;
+      schwab_connection_status: SchwabConnectionStatus;
     };
   };
 };

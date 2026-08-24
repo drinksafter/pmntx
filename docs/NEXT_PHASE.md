@@ -29,9 +29,32 @@ Everything here is explicitly out of scope for Phase 1A per `docs/PHASE_1A_SCOPE
 
 ## Portfolio & execution
 - Brokerage connectivity, live execution
-- SchwabMarketDataProvider, SchwabBrokerProvider — preserve compatibility with the AIProvider/data-provider abstractions already in place, do not implement in Phase 1A
 - Portfolio optimization
 - Manual paper/user portfolio entry UI beyond the per-system paper portfolios Phase 1A already tracks for performance
+
+### SchwabBrokerProvider (explicitly not implemented — read-only Schwab market data/account access shipped separately; see `docs/SCHWAB_INTEGRATION.md`)
+
+`SchwabMarketDataProvider` and `SchwabAccountProvider` (read-only) exist. `SchwabBrokerProvider` does not, and must not be built until this future flow is deliberately scoped:
+
+```
+PMNTx Research
+  → Risk Engine
+  → Portfolio Engine
+  → Proposed Order
+  → Execution Policy
+  → human approval
+  → SchwabBrokerProvider
+```
+
+Future execution modes, in increasing order of autonomy — only the first is ever assumed by default:
+
+- `RESEARCH_ONLY` / `READ_ONLY` — what exists today; no order can be placed.
+- `PAPER` — simulated fills against real Schwab quotes, no real order sent.
+- `STAGED` — an order is prepared and shown to a human, who submits it manually outside PMNTx.
+- `GUARDED_AUTO` — PMNTx submits within tight, pre-approved bounds (size, security allow-list, daily caps) with human override.
+- `LIVE` — full autonomous execution. Requires all of the above to exist and be trusted first.
+
+Schwab's Accounts and Trading product does expose order placement/replacement/cancellation endpoints (see `docs/SCHWAB_INTEGRATION.md` §7) — their existence in the API is not authorization to use them. No trading endpoint is called anywhere in the Phase 1A or Phase 1A-validation codebase.
 
 ## Distributed research workers
 - ResearchWorker, including future cloud workers or dedicated Mac/OpenClaw research workers — PMNTX/Supabase remains the sole authoritative system of record in Phase 1A; no external worker executes research or writes directly to the Prediction Warehouse
