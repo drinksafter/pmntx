@@ -534,6 +534,54 @@ export type Database = {
         };
         Relationships: [];
       };
+      revealed_analyses: {
+        Row: {
+          id: string;
+          blind_analysis_id: string;
+          security_id: string;
+          ai_execution_id: string | null;
+          provider_code: string;
+          model_code: string;
+          prompt_version_id: string | null;
+          recommendation: IdeaDirection | null;
+          probabilities: unknown;
+          reasoning: string | null;
+          narrative_adjustment: number | null;
+          frozen_at: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          blind_analysis_id: string;
+          security_id: string;
+          ai_execution_id?: string | null;
+          provider_code: string;
+          model_code: string;
+          prompt_version_id?: string | null;
+          recommendation?: IdeaDirection | null;
+          probabilities?: unknown;
+          reasoning?: string | null;
+          narrative_adjustment?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          blind_analysis_id?: string;
+          security_id?: string;
+          ai_execution_id?: string | null;
+          provider_code?: string;
+          model_code?: string;
+          prompt_version_id?: string | null;
+          recommendation?: IdeaDirection | null;
+          probabilities?: unknown;
+          reasoning?: string | null;
+          narrative_adjustment?: number | null;
+          frozen_at?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       securities: {
         Row: {
           id: string;
