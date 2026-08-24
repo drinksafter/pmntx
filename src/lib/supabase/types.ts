@@ -35,6 +35,10 @@ export type IngestionTrigger = "SCHEDULED" | "MANUAL";
 
 export type SignalDirection = "BULLISH" | "BEARISH" | "NEUTRAL";
 
+export type ResearchRunOrigin = "PMNTX_CORE" | "AGENT";
+export type ResearchRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
+export type IdeaDirection = "LONG" | "SHORT" | "WATCH" | "PASS";
+
 export type Database = {
   public: {
     Tables: {
@@ -575,6 +579,117 @@ export type Database = {
         };
         Relationships: [];
       };
+      research_runs: {
+        Row: {
+          id: string;
+          run_date: string;
+          origin_type: ResearchRunOrigin;
+          status: ResearchRunStatus;
+          score_version: string | null;
+          started_at: string | null;
+          completed_at: string | null;
+          frozen_at: string | null;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          run_date: string;
+          origin_type: ResearchRunOrigin;
+          status?: ResearchRunStatus;
+          score_version?: string | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          frozen_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          run_date?: string;
+          origin_type?: ResearchRunOrigin;
+          status?: ResearchRunStatus;
+          score_version?: string | null;
+          started_at?: string | null;
+          completed_at?: string | null;
+          frozen_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      candidate_rankings: {
+        Row: {
+          id: string;
+          research_run_id: string;
+          security_id: string;
+          rank: number | null;
+          score: number;
+          score_components: unknown;
+          selected: boolean;
+          selection_reason: string | null;
+          direction: IdeaDirection | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          research_run_id: string;
+          security_id: string;
+          rank?: number | null;
+          score: number;
+          score_components?: unknown;
+          selected?: boolean;
+          selection_reason?: string | null;
+          direction?: IdeaDirection | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          research_run_id?: string;
+          security_id?: string;
+          rank?: number | null;
+          score?: number;
+          score_components?: unknown;
+          selected?: boolean;
+          selection_reason?: string | null;
+          direction?: IdeaDirection | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      daily_rank_snapshots: {
+        Row: {
+          id: string;
+          research_run_id: string;
+          security_id: string;
+          rank: number;
+          score: number;
+          percentile: number | null;
+          decile: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          research_run_id: string;
+          security_id: string;
+          rank: number;
+          score: number;
+          percentile?: number | null;
+          decile?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          research_run_id?: string;
+          security_id?: string;
+          rank?: number;
+          score?: number;
+          percentile?: number | null;
+          decile?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -587,6 +702,9 @@ export type Database = {
       ingestion_status: IngestionStatus;
       ingestion_trigger: IngestionTrigger;
       signal_direction: SignalDirection;
+      research_run_origin: ResearchRunOrigin;
+      research_run_status: ResearchRunStatus;
+      idea_direction: IdeaDirection;
     };
   };
 };
