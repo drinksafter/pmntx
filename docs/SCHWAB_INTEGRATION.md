@@ -2,7 +2,7 @@
 
 Researched against developer.schwab.com and corroborating primary-adjacent sources (`developer.schwab.com` itself returned HTTP 403 to automated fetches — likely bot protection — so several details below are sourced from `schwab-py`, a widely-used, actively-maintained unofficial Python wrapper whose maintainers track the official docs closely, cross-checked against multiple independent write-ups). Where a detail could not be independently confirmed, it's marked **unverified — confirm in your own developer.schwab.com app dashboard**, not presented as fact.
 
-This document covers **read-only market data and account data only**. Trading endpoints are documented for awareness in §7, but PMNTx does not implement them — see `docs/NEXT_PHASE.md` for the future `SchwabBrokerProvider` plan.
+This document covers **read-only market data and account data**, plus the `SchwabBrokerProvider` execution-*policy* architecture (`src/lib/broker/`). Real order submission is a separate, hard-disabled stub — see §9 and §7 below.
 
 ## 1. What Schwab actually is, for this purpose
 
@@ -62,7 +62,7 @@ Commonly cited across third-party clients: **~120 requests/minute**. This is **u
 
 ## 7. Trading endpoints (documented for awareness only — NOT implemented)
 
-The Accounts and Trading product also exposes: place order, replace order, cancel order, across equities and options. **None of this is implemented in PMNTx.** See `docs/NEXT_PHASE.md` for the `SchwabBrokerProvider` architecture placeholder and the required future flow (Research → Risk Engine → Portfolio Engine → Proposed Order → Execution Policy → human approval → SchwabBrokerProvider) before any order-placement code is ever written.
+The Accounts and Trading product also exposes: place order, replace order, cancel order, across equities and options. **None of this is implemented.** `src/lib/broker/schwab-broker-provider.ts` provides `SchwabBrokerProvider.submitOrder()` as a hard-disabled stub — it always returns `REFUSED` regardless of caller, mode, or admin configuration, and no call site in the ProposedTrade pipeline (`src/lib/broker/proposed-trades.ts`) invokes it. See `docs/NEXT_PHASE.md` for the required future flow (Research → Risk Engine → Portfolio Engine → Proposed Order → Execution Policy → human approval → SchwabBrokerProvider) before real order-placement code is ever written.
 
 ## 8. What PMNTx needs from you to connect a real account
 
@@ -93,7 +93,7 @@ As of this writing, **no real Schwab account has been connected to PMNTx.** Ever
 - **OAuth**: real authorize-URL redirect, real consent screen, real callback with a real authorization code, real token exchange, confirm `schwab_connection.status` becomes `CONNECTED` with real (encrypted) tokens, confirm the ~30 min access / ~7 day refresh lifetimes hold, force a real refresh near expiry, confirm reauthorization is correctly required once the 7-day refresh window lapses, confirm Disconnect revokes PMNTx's local session.
 - **Market data**: real quotes for a handful of liquid, well-known symbols, confirm bid/ask/last/volume/timestamp look sane against a second real source, confirm freshness classifies as LIVE during market hours and DELAYED/STALE appropriately outside them, real daily price history for at least one symbol.
 - **Account data**: real account discovery (masked correctly — only last 4 digits ever visible in PMNTx), real balances/buying power/positions for the connected account(s), confirm figures match Schwab's own UI at time of sync.
-- **Broker/execution layer** (once `SchwabBrokerProvider` exists — see `docs/NEXT_PHASE.md`): PAPER mode against the real market-data feed but never a real order; only after extensive PAPER-mode validation would STAGED/HUMAN_APPROVAL modes be considered, and only with explicit, separate user approval — this document does not authorize that step.
+- **Broker/execution layer** (`src/lib/broker/` — architecture and policy framework already built and mock-validated, see the commit that added it): once a real account is connected, PAPER mode could run against the real market-data feed but never a real order (`SchwabBrokerProvider.submitOrder()` stays a hard-disabled stub throughout); only after extensive PAPER-mode validation would STAGED/HUMAN_APPROVAL modes even be considered, and only with explicit, separate user approval — this document does not authorize that step, and actually enabling real order submission requires code changes this document does not describe.
 
 None of the above should be attempted without the user explicitly initiating it in a later, separate session.
 
