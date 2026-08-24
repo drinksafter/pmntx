@@ -8,18 +8,23 @@ import { createClient } from "@/lib/supabase/client";
 type LinkStatus = "verifying" | "ready" | "invalid";
 
 // Landing page for Supabase recovery/invite links. Those links deliver the
-// session via URL fragment (#access_token=...), which only client-side JS
-// can read — a server route handler never sees it, since fragments aren't
-// sent over HTTP (see the commit that added this file). The Supabase JS
-// SDK parses that fragment asynchronously the moment its client is
-// constructed, so the client must be created on mount (not inside the
-// submit handler) and the page must wait for that to finish before
-// calling updateUser — otherwise it races the SDK and updateUser fails
-// with "Auth session missing", even though the link itself was valid.
+// session via URL fragment (#access_token=...&refresh_token=...), which
+// only client-side JS can read — a server route handler never sees it,
+// since fragments aren't sent over HTTP.
+//
+// This parses the fragment itself and calls setSession() explicitly,
+// rather than relying solely on the SDK's automatic detectSessionInUrl:
+// that runs asynchronously the moment the client is constructed and
+// historically raced with this page's own effects (see prior commits).
+// Explicit parsing also lets a real Supabase-reported error
+// (#error=...&error_code=...) surface as-is instead of a generic message,
+// so "the link genuinely expired" and "the client-side handling is buggy"
+// aren't indistinguishable.
 export default function SetPasswordPage() {
   const router = useRouter();
   const [supabase] = useState(() => createClient());
   const [linkStatus, setLinkStatus] = useState<LinkStatus>("verifying");
+  const [linkError, setLinkError] = useState<string | null>(null);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -28,28 +33,57 @@ export default function SetPasswordPage() {
   useEffect(() => {
     let cancelled = false;
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
+    async function establishSession() {
+      const hash = window.location.hash.startsWith("#")
+        ? window.location.hash.slice(1)
+        : window.location.hash;
+      const params = new URLSearchParams(hash);
+
+      const hashError = params.get("error_description") ?? params.get("error");
+      if (hashError) {
+        if (!cancelled) {
+          setLinkError(decodeURIComponent(hashError.replace(/\+/g, " ")));
+          setLinkStatus("invalid");
+        }
+        return;
+      }
+
+      const accessToken = params.get("access_token");
+      const refreshToken = params.get("refresh_token");
+
+      if (accessToken && refreshToken) {
+        const { error: setSessionError } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: refreshToken,
+        });
+        // Remove the tokens from the visible URL/history regardless of outcome.
+        window.history.replaceState(null, "", window.location.pathname);
+
+        if (cancelled) return;
+        if (setSessionError) {
+          setLinkError(setSessionError.message);
+          setLinkStatus("invalid");
+        } else {
+          setLinkStatus("ready");
+        }
+        return;
+      }
+
+      // No tokens and no error in the hash — maybe a session already
+      // exists from a previous successful load of this same link.
+      const { data } = await supabase.auth.getSession();
       if (cancelled) return;
-      if (event === "PASSWORD_RECOVERY" || session) setLinkStatus("ready");
-    });
+      if (data.session) {
+        setLinkStatus("ready");
+      } else {
+        setLinkError(null);
+        setLinkStatus("invalid");
+      }
+    }
 
-    // Fallback in case the PASSWORD_RECOVERY event already fired before
-    // this listener was attached, or the SDK finishes parsing the URL
-    // without emitting that specific event.
-    supabase.auth.getSession().then(({ data }) => {
-      if (!cancelled && data.session) setLinkStatus("ready");
-    });
-
-    const timeout = setTimeout(() => {
-      if (!cancelled) setLinkStatus((current) => (current === "verifying" ? "invalid" : current));
-    }, 5000);
-
+    establishSession();
     return () => {
       cancelled = true;
-      subscription.unsubscribe();
-      clearTimeout(timeout);
     };
   }, [supabase]);
 
@@ -88,8 +122,10 @@ export default function SetPasswordPage() {
           <p className="text-sm text-neutral-500">Verifying your link…</p>
         ) : linkStatus === "invalid" ? (
           <p role="alert" className="text-sm text-red-400">
-            This link is invalid, expired, or already used. Recovery links are single-use — ask
-            for a new one.
+            {linkError
+              ? `Link error: ${linkError}`
+              : "This link is invalid, expired, or already used."}{" "}
+            Recovery links are single-use — ask for a new one.
           </p>
         ) : (
           <>
