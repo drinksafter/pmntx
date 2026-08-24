@@ -26,6 +26,8 @@ export type IntegrationService =
 
 export type IntegrationHealthStatus = "NOT_CONFIGURED" | "OK" | "DEGRADED" | "ERROR";
 
+export type AiExecutionStatus = "SUCCEEDED" | "FAILED";
+
 export type Database = {
   public: {
     Tables: {
@@ -125,6 +127,123 @@ export type Database = {
         };
         Relationships: [];
       };
+      ai_providers: {
+        Row: { id: string; code: string; name: string; is_enabled: boolean };
+        Insert: { id?: string; code: string; name: string; is_enabled?: boolean };
+        Update: { id?: string; code?: string; name?: string; is_enabled?: boolean };
+        Relationships: [];
+      };
+      ai_models: {
+        Row: {
+          id: string;
+          ai_provider_id: string;
+          model_code: string;
+          display_name: string;
+          is_enabled: boolean;
+          cost_input_per_million: number | null;
+          cost_output_per_million: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          ai_provider_id: string;
+          model_code: string;
+          display_name: string;
+          is_enabled?: boolean;
+          cost_input_per_million?: number | null;
+          cost_output_per_million?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          ai_provider_id?: string;
+          model_code?: string;
+          display_name?: string;
+          is_enabled?: boolean;
+          cost_input_per_million?: number | null;
+          cost_output_per_million?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      ai_routes: {
+        Row: {
+          id: string;
+          role_code: string;
+          ai_model_id: string;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          role_code: string;
+          ai_model_id: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          role_code?: string;
+          ai_model_id?: string;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      ai_executions: {
+        Row: {
+          id: string;
+          ai_route_id: string | null;
+          ai_model_id: string;
+          prompt_version_id: string | null;
+          role_code: string;
+          input_hash: string | null;
+          input_summary: unknown | null;
+          output: unknown | null;
+          tokens_input: number | null;
+          tokens_output: number | null;
+          estimated_cost_usd: number | null;
+          latency_ms: number | null;
+          status: AiExecutionStatus;
+          error_message: string | null;
+          executed_at: string;
+        };
+        Insert: {
+          id?: string;
+          ai_route_id?: string | null;
+          ai_model_id: string;
+          prompt_version_id?: string | null;
+          role_code: string;
+          input_hash?: string | null;
+          input_summary?: unknown | null;
+          output?: unknown | null;
+          tokens_input?: number | null;
+          tokens_output?: number | null;
+          estimated_cost_usd?: number | null;
+          latency_ms?: number | null;
+          status: AiExecutionStatus;
+          error_message?: string | null;
+          executed_at?: string;
+        };
+        Update: {
+          id?: string;
+          ai_route_id?: string | null;
+          ai_model_id?: string;
+          prompt_version_id?: string | null;
+          role_code?: string;
+          input_hash?: string | null;
+          input_summary?: unknown | null;
+          output?: unknown | null;
+          tokens_input?: number | null;
+          tokens_output?: number | null;
+          estimated_cost_usd?: number | null;
+          latency_ms?: number | null;
+          status?: AiExecutionStatus;
+          error_message?: string | null;
+          executed_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -132,6 +251,7 @@ export type Database = {
       user_role: UserRole;
       integration_service: IntegrationService;
       integration_health_status: IntegrationHealthStatus;
+      ai_execution_status: AiExecutionStatus;
     };
   };
 };
