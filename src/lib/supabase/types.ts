@@ -1885,6 +1885,93 @@ export type Database = {
         };
         Relationships: [];
       };
+      routing_tier_configs: {
+        Row: {
+          id: string;
+          tier_code: string;
+          display_name: string;
+          min_rank: number | null;
+          max_rank: number | null;
+          min_confidence: number | null;
+          min_disagreement: number | null;
+          requires_material_change: boolean;
+          max_daily_invocations: number | null;
+          min_hours_since_last_analysis: number | null;
+          is_enabled: boolean;
+          updated_at: string;
+          updated_by: string | null;
+        };
+        Insert: {
+          id?: string;
+          tier_code: string;
+          display_name: string;
+          min_rank?: number | null;
+          max_rank?: number | null;
+          min_confidence?: number | null;
+          min_disagreement?: number | null;
+          requires_material_change?: boolean;
+          max_daily_invocations?: number | null;
+          min_hours_since_last_analysis?: number | null;
+          is_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: string;
+          tier_code?: string;
+          display_name?: string;
+          min_rank?: number | null;
+          max_rank?: number | null;
+          min_confidence?: number | null;
+          min_disagreement?: number | null;
+          requires_material_change?: boolean;
+          max_daily_invocations?: number | null;
+          min_hours_since_last_analysis?: number | null;
+          is_enabled?: boolean;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Relationships: [];
+      };
+      router_decisions: {
+        Row: {
+          id: string;
+          candidate_ranking_id: string | null;
+          security_id: string | null;
+          tier_code: string;
+          decision: "INVOKE" | "SKIP";
+          reasoning: string;
+          inputs_snapshot: unknown;
+          budget_remaining_daily_usd: number | null;
+          budget_remaining_monthly_usd: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          candidate_ranking_id?: string | null;
+          security_id?: string | null;
+          tier_code: string;
+          decision: "INVOKE" | "SKIP";
+          reasoning: string;
+          inputs_snapshot?: unknown;
+          budget_remaining_daily_usd?: number | null;
+          budget_remaining_monthly_usd?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          candidate_ranking_id?: string | null;
+          security_id?: string | null;
+          tier_code?: string;
+          decision?: "INVOKE" | "SKIP";
+          reasoning?: string;
+          inputs_snapshot?: unknown;
+          budget_remaining_daily_usd?: number | null;
+          budget_remaining_monthly_usd?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       daily_rank_snapshots: {
         Row: {
           id: string;
