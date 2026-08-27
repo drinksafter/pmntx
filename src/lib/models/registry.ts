@@ -82,16 +82,20 @@ export async function promoteModelVersion(
   reason: string,
   actorProfileId?: string | null
 ): Promise<void> {
-  if (toStatus === "PRODUCTION" && !isAdminPromotionAction()) {
-    throw new Error(
-      "Promoting a model version to PRODUCTION requires an explicit admin action " +
-        "(runAsAdminPromotionAction) — no automated or research code path may do this directly."
-    );
-  }
-
   const supabase = createServiceRoleClient();
   const { data: current } = await supabase.from("model_versions").select("status").eq("id", modelVersionId).single();
   if (!current) throw new Error(`Model version ${modelVersionId} not found.`);
+
+  // The gate covers BOTH directions of crossing the PRODUCTION boundary —
+  // demoting a live production model is just as consequential as
+  // promoting one, and originally only promotion was gated.
+  const entersOrLeavesProduction = toStatus === "PRODUCTION" || current.status === "PRODUCTION";
+  if (entersOrLeavesProduction && !isAdminPromotionAction()) {
+    throw new Error(
+      "Changing a model version's status into or out of PRODUCTION requires an explicit admin action " +
+        "(runAsAdminPromotionAction) — no automated or research code path may do this directly."
+    );
+  }
 
   const { error } = await supabase
     .from("model_versions")

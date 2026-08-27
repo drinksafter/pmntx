@@ -4,6 +4,7 @@ import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 export type PerformanceBucket = {
   origin: string;
+  environment: string;
   agentInternalName: string | null;
   horizon: string;
   resolvedCount: number;
@@ -37,7 +38,7 @@ export async function computePerformanceSummary(): Promise<PerformanceBucket[]> 
   const horizonById = new Map((horizons ?? []).map((h) => [h.id, h]));
 
   const predictionIds = [...new Set((horizons ?? []).map((h) => h.prediction_id))];
-  const { data: predictions } = await supabase.from("predictions").select("id, origin, agent_id").in("id", predictionIds);
+  const { data: predictions } = await supabase.from("predictions").select("id, origin, agent_id, environment").in("id", predictionIds);
   const predictionById = new Map((predictions ?? []).map((p) => [p.id, p]));
 
   const { data: agents } = await supabase.from("agents").select("id, internal_name");
@@ -45,7 +46,7 @@ export async function computePerformanceSummary(): Promise<PerformanceBucket[]> 
 
   const groups = new Map<
     string,
-    { origin: string; agentInternalName: string | null; horizon: string; returns: number[]; correctness: (boolean | null)[] }
+    { origin: string; environment: string; agentInternalName: string | null; horizon: string; returns: number[]; correctness: (boolean | null)[] }
   >();
 
   for (const outcome of outcomes) {
@@ -55,9 +56,13 @@ export async function computePerformanceSummary(): Promise<PerformanceBucket[]> 
     if (!prediction) continue;
 
     const agentInternalName = prediction.agent_id ? (agentNameById.get(prediction.agent_id) ?? null) : null;
-    const key = `${prediction.origin}:${horizonRow.horizon}`;
+    // environment is part of the key — a SHADOW-environment prediction's
+    // resolved performance must never be silently mixed into the same
+    // bucket as a PRODUCTION-environment prediction's performance.
+    const key = `${prediction.origin}:${prediction.environment}:${horizonRow.horizon}`;
     const group = groups.get(key) ?? {
       origin: prediction.origin,
+      environment: prediction.environment,
       agentInternalName,
       horizon: horizonRow.horizon,
       returns: [],
@@ -72,6 +77,7 @@ export async function computePerformanceSummary(): Promise<PerformanceBucket[]> 
     const validCorrectness = g.correctness.filter((c): c is boolean => c !== null);
     return {
       origin: g.origin,
+      environment: g.environment,
       agentInternalName: g.agentInternalName,
       horizon: g.horizon,
       resolvedCount: g.returns.length,

@@ -41,6 +41,52 @@ export type StandardizedPredictionResult = { predictionId: string; predictionHor
 export async function freezeStandardizedPrediction(input: StandardizedPredictionInput): Promise<StandardizedPredictionResult> {
   const supabase = createServiceRoleClient();
 
+  // Validate BEFORE any insert — a prediction is frozen (and therefore
+  // permanently immutable) the moment the predictions row is created, so
+  // any input that would corrupt provenance or violate the point-in-time
+  // guarantee must be rejected here, not discovered after the fact. This
+  // also avoids the specific partial-write failure mode where a bad
+  // featureValueId used to fail on the LAST insert (the snapshot),
+  // leaving an already-frozen, permanently orphaned prediction behind.
+  const { data: modelVersionRow, error: modelVersionLookupError } = await supabase
+    .from("model_versions")
+    .select("model_id")
+    .eq("id", input.modelVersionId)
+    .maybeSingle();
+  if (modelVersionLookupError) throw modelVersionLookupError;
+  if (!modelVersionRow) {
+    throw new Error(`freezeStandardizedPrediction: model_version ${input.modelVersionId} does not exist.`);
+  }
+  if (modelVersionRow.model_id !== input.modelId) {
+    throw new Error(
+      `freezeStandardizedPrediction: modelVersionId ${input.modelVersionId} belongs to model ${modelVersionRow.model_id}, not the supplied modelId ${input.modelId}.`
+    );
+  }
+
+  if (input.featureValueIds && input.featureValueIds.length > 0) {
+    const { data: featureValueRows, error: featureValueLookupError } = await supabase
+      .from("feature_values")
+      .select("id, available_at")
+      .in("id", input.featureValueIds);
+    if (featureValueLookupError) throw featureValueLookupError;
+
+    const foundIds = new Set((featureValueRows ?? []).map((r) => r.id));
+    const missingIds = input.featureValueIds.filter((id) => !foundIds.has(id));
+    if (missingIds.length > 0) {
+      throw new Error(`freezeStandardizedPrediction: feature_value id(s) not found: ${missingIds.join(", ")}.`);
+    }
+
+    const referenceTime = new Date(input.referencePriceAt).getTime();
+    const notYetAvailable = (featureValueRows ?? []).filter((r) => new Date(r.available_at).getTime() > referenceTime);
+    if (notYetAvailable.length > 0) {
+      throw new Error(
+        `freezeStandardizedPrediction: feature_value id(s) not yet available as of referencePriceAt (${input.referencePriceAt}): ` +
+          notYetAvailable.map((r) => `${r.id} (available_at=${r.available_at})`).join(", ") +
+          " — this would violate the point-in-time guarantee."
+      );
+    }
+  }
+
   const { data: idea, error: ideaError } = await supabase
     .from("ideas")
     .insert({

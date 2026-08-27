@@ -1,12 +1,18 @@
 import "server-only";
 
+import { randomUUID } from "node:crypto";
+
 import { trainLogisticRegression } from "@/lib/models/baseline-logistic";
 import { trainNaiveMajorityClassifier } from "@/lib/models/baseline-naive";
-import { registerModelVersion } from "@/lib/models/registry";
+import { promoteModelVersion, registerModelVersion } from "@/lib/models/registry";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 import { buildDataset } from "./dataset";
 import type { ExperimentConfig, ExperimentRunResult, LabeledRow, PromotionDecision } from "./types";
+
+function randomExperimentSuffix(): string {
+  return randomUUID().slice(0, 8);
+}
 
 function accuracy(predictions: number[], labels: number[]): number {
   if (predictions.length === 0) return 0;
@@ -18,6 +24,11 @@ function accuracy(predictions: number[], labels: number[]): number {
 // test set to be promoted — otherwise the added complexity isn't earning
 // its keep (pivot brief §13 "baselines are mandatory").
 const PROMOTION_MARGIN = 0.02;
+
+// The synthetic fixtures this baseline trains on don't go through the
+// point-in-time feature store's own versioning yet — 'v1' matches the
+// default feature_schema_version used everywhere else in this phase.
+const BASELINE_FEATURE_SCHEMA_VERSION = "v1";
 
 /**
  * DATASET -> TRAIN -> VALIDATE -> WALK-FORWARD TEST -> COST/SLIPPAGE
@@ -38,6 +49,17 @@ export async function runBaselineExperiment(
   // DATASET
   const dataset = buildDataset(rows, config.boundaries);
 
+  // Register the candidate model version UP FRONT, before training —
+  // previously this only happened inside the PROMOTE_TO_SHADOW branch,
+  // which meant REJECT/INCONCLUSIVE runs had no version to record and
+  // experiments.candidate_model_version_id could never be populated.
+  const candidateVersion = await registerModelVersion({
+    modelId,
+    version: `exp-${randomExperimentSuffix()}`,
+    costClass: "FREE",
+    requiredFeatureSchemaVersion: BASELINE_FEATURE_SCHEMA_VERSION,
+  });
+
   const { data: experiment, error: experimentError } = await supabase
     .from("experiments")
     .insert({
@@ -53,6 +75,8 @@ export async function runBaselineExperiment(
       test_end_date: config.boundaries.testEnd.slice(0, 10),
       dataset_start_date: config.boundaries.trainStart.slice(0, 10),
       dataset_end_date: config.boundaries.testEnd.slice(0, 10),
+      candidate_model_version_id: candidateVersion.id,
+      feature_schema_version: BASELINE_FEATURE_SCHEMA_VERSION,
     })
     .select("id")
     .single();
@@ -108,8 +132,16 @@ export async function runBaselineExperiment(
     promotionDecision = "INCONCLUSIVE";
   } else if (logisticBeatsNaive) {
     promotionDecision = "PROMOTE_TO_SHADOW";
-    const version = await registerModelVersion({ modelId, version: `exp-${run.id.slice(0, 8)}`, costClass: "FREE" });
-    candidateModelVersionId = version.id;
+    candidateModelVersionId = candidateVersion.id;
+    // Actually execute the decision — previously this recorded the label
+    // without ever calling promoteModelVersion, so the version stayed
+    // EXPERIMENTAL forever. SHADOW doesn't cross the PRODUCTION boundary,
+    // so no admin-action context is required here.
+    await promoteModelVersion(
+      candidateVersion.id,
+      "SHADOW",
+      `Experiment ${config.name}: logistic (${logisticAccuracy.toFixed(4)}) beat naive (${naiveAccuracy.toFixed(4)}) by >= ${PROMOTION_MARGIN} margin on held-out test set.`
+    );
   } else {
     promotionDecision = "REJECT";
   }
