@@ -1,5 +1,6 @@
 import "server-only";
 
+import { getActiveProductionModelVersion } from "@/lib/models/registry";
 import { createServiceRoleClient } from "@/lib/supabase/service-role";
 
 // A single default research horizon for Phase 1A. blind_analyses records
@@ -36,9 +37,16 @@ export type PredictionFreezeResult = {
  */
 export async function freezePmntxCorePredictionForSecurity(
   researchRunId: string,
-  securityId: string
+  securityId: string,
+  modelVersion?: { id: string; modelId: string }
 ): Promise<PredictionFreezeResult> {
   const supabase = createServiceRoleClient();
+
+  // Comparability with the model registry (ML pivot) — origin/direction/
+  // score logic below is completely unchanged; this only tags the row
+  // with which model version produced it, defaulting to Core's own seeded
+  // production version (supabase/migrations/030_model_registry.sql).
+  const resolvedModel = modelVersion ?? (await getActiveProductionModelVersion("PMNTX_CORE"));
 
   const { data: existing } = await supabase
     .from("predictions")
@@ -154,6 +162,8 @@ export async function freezePmntxCorePredictionForSecurity(
       risks,
       ai_execution_id: primaryAiExecutionId,
       prompt_version_id: primaryPromptVersionId,
+      model_id: resolvedModel?.modelId ?? null,
+      model_version_id: resolvedModel?.id ?? null,
       frozen_at: now,
     })
     .select("id")

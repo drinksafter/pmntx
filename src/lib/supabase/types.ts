@@ -55,7 +55,8 @@ export type IdeaOrigin =
   | "USER_THEME"
   | "USER_THESIS"
   | "EDGE_LAB"
-  | "OTHER_SYSTEM";
+  | "OTHER_SYSTEM"
+  | "ML_MODEL";
 
 export type ForecastHorizon = "D1" | "D5" | "D10" | "D21" | "D63" | "D126" | "Y1" | "Y2" | "Y3" | "Y5";
 export type ForecastType = "FORECAST" | "NO_FORECAST" | "INSUFFICIENT_EDGE" | "OUTSIDE_MANDATE";
@@ -112,6 +113,27 @@ export type FeatureFamily =
   | "MACRO_RATES"
   | "ALTERNATIVE_DATA"
   | "OPTIONS_DERIVED";
+
+export type ModelType =
+  | "NAIVE_BASELINE"
+  | "DETERMINISTIC_FACTOR"
+  | "LINEAR"
+  | "LOGISTIC"
+  | "TREE_BOOSTING"
+  | "NEURAL"
+  | "PMNTX_CORE"
+  | "LLM_ANALYST"
+  | "SPECIALIST_AGENT"
+  | "ENSEMBLE";
+export type ModelStatus = "EXPERIMENTAL" | "VALIDATED" | "SHADOW" | "PAPER" | "PRODUCTION" | "RETIRED";
+export type ModelPromotionEventType =
+  | "REGISTERED"
+  | "VALIDATED"
+  | "PROMOTED_TO_SHADOW"
+  | "PROMOTED_TO_PAPER"
+  | "PROMOTED_TO_PRODUCTION"
+  | "DEMOTED"
+  | "RETIRED";
 
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
@@ -898,6 +920,11 @@ export type Database = {
           ai_execution_id: string | null;
           prompt_version_id: string | null;
           supersedes_prediction_id: string | null;
+          model_id: string | null;
+          model_version_id: string | null;
+          environment: "PRODUCTION" | "SHADOW" | "EXPERIMENT";
+          estimated_inference_cost_usd: number | null;
+          actual_inference_cost_usd: number | null;
           frozen_at: string | null;
           created_at: string;
         };
@@ -923,6 +950,11 @@ export type Database = {
           ai_execution_id?: string | null;
           prompt_version_id?: string | null;
           supersedes_prediction_id?: string | null;
+          model_id?: string | null;
+          model_version_id?: string | null;
+          environment?: "PRODUCTION" | "SHADOW" | "EXPERIMENT";
+          estimated_inference_cost_usd?: number | null;
+          actual_inference_cost_usd?: number | null;
           frozen_at?: string | null;
           created_at?: string;
         };
@@ -948,6 +980,11 @@ export type Database = {
           ai_execution_id?: string | null;
           prompt_version_id?: string | null;
           supersedes_prediction_id?: string | null;
+          model_id?: string | null;
+          model_version_id?: string | null;
+          environment?: "PRODUCTION" | "SHADOW" | "EXPERIMENT";
+          estimated_inference_cost_usd?: number | null;
+          actual_inference_cost_usd?: number | null;
           frozen_at?: string | null;
           created_at?: string;
         };
@@ -2064,6 +2101,138 @@ export type Database = {
           },
         ];
       };
+      models: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          model_type: ModelType;
+          description: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          model_type: ModelType;
+          description?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          model_type?: ModelType;
+          description?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      model_versions: {
+        Row: {
+          id: string;
+          model_id: string;
+          version: string;
+          status: ModelStatus;
+          horizons: ForecastHorizon[];
+          required_feature_schema_version: string | null;
+          training_period_start: string | null;
+          training_period_end: string | null;
+          validation_period_start: string | null;
+          validation_period_end: string | null;
+          artifact_reference: unknown;
+          cost_class: string;
+          estimated_inference_cost_usd: number;
+          config: unknown;
+          created_at: string;
+          promoted_at: string | null;
+          retired_at: string | null;
+          retirement_reason: string | null;
+        };
+        Insert: {
+          id?: string;
+          model_id: string;
+          version: string;
+          status?: ModelStatus;
+          horizons?: ForecastHorizon[];
+          required_feature_schema_version?: string | null;
+          training_period_start?: string | null;
+          training_period_end?: string | null;
+          validation_period_start?: string | null;
+          validation_period_end?: string | null;
+          artifact_reference?: unknown;
+          cost_class?: string;
+          estimated_inference_cost_usd?: number;
+          config?: unknown;
+          created_at?: string;
+          promoted_at?: string | null;
+          retired_at?: string | null;
+          retirement_reason?: string | null;
+        };
+        Update: {
+          id?: string;
+          model_id?: string;
+          version?: string;
+          status?: ModelStatus;
+          horizons?: ForecastHorizon[];
+          required_feature_schema_version?: string | null;
+          training_period_start?: string | null;
+          training_period_end?: string | null;
+          validation_period_start?: string | null;
+          validation_period_end?: string | null;
+          artifact_reference?: unknown;
+          cost_class?: string;
+          estimated_inference_cost_usd?: number;
+          config?: unknown;
+          created_at?: string;
+          promoted_at?: string | null;
+          retired_at?: string | null;
+          retirement_reason?: string | null;
+        };
+        Relationships: [];
+      };
+      model_promotion_events: {
+        Row: {
+          id: string;
+          model_version_id: string;
+          event_type: ModelPromotionEventType;
+          from_status: ModelStatus | null;
+          to_status: ModelStatus;
+          reason: string | null;
+          detail: unknown;
+          actor: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          model_version_id: string;
+          event_type: ModelPromotionEventType;
+          from_status?: ModelStatus | null;
+          to_status: ModelStatus;
+          reason?: string | null;
+          detail?: unknown;
+          actor?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          model_version_id?: string;
+          event_type?: ModelPromotionEventType;
+          from_status?: ModelStatus | null;
+          to_status?: ModelStatus;
+          reason?: string | null;
+          detail?: unknown;
+          actor?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      prediction_feature_snapshot: {
+        Row: { id: string; prediction_id: string; feature_value_id: string; created_at: string };
+        Insert: { id?: string; prediction_id: string; feature_value_id: string; created_at?: string };
+        Update: { id?: string; prediction_id?: string; feature_value_id?: string; created_at?: string };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -2097,6 +2266,9 @@ export type Database = {
       proposed_trade_status: ProposedTradeStatus;
       proposed_trade_event_type: ProposedTradeEventType;
       feature_family: FeatureFamily;
+      model_type: ModelType;
+      model_status: ModelStatus;
+      model_promotion_event_type: ModelPromotionEventType;
     };
   };
 };
