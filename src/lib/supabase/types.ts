@@ -99,6 +99,20 @@ export type ProposedTradeEventType =
   | "CANCELLED"
   | "EXECUTION_BLOCKED";
 
+export type FeatureFamily =
+  | "RETURNS"
+  | "MOMENTUM"
+  | "VOLATILITY"
+  | "VOLUME_LIQUIDITY"
+  | "RELATIVE_STRENGTH"
+  | "FUNDAMENTALS"
+  | "EARNINGS"
+  | "VALUATION"
+  | "SECTOR_INDUSTRY"
+  | "MACRO_RATES"
+  | "ALTERNATIVE_DATA"
+  | "OPTIONS_DERIVED";
+
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
   | "BLOCKED_DAILY_BUDGET"
@@ -1959,6 +1973,97 @@ export type Database = {
         };
         Relationships: [];
       };
+      feature_definitions: {
+        Row: {
+          id: string;
+          code: string;
+          name: string;
+          family: FeatureFamily;
+          description: string | null;
+          schema_version: string;
+          is_active: boolean;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          code: string;
+          name: string;
+          family: FeatureFamily;
+          description?: string | null;
+          schema_version?: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          code?: string;
+          name?: string;
+          family?: FeatureFamily;
+          description?: string | null;
+          schema_version?: string;
+          is_active?: boolean;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      feature_values: {
+        Row: {
+          id: string;
+          feature_definition_id: string;
+          security_id: string;
+          value: number;
+          observation_at: string;
+          effective_at: string | null;
+          publication_at: string | null;
+          available_at: string;
+          source: string;
+          source_version: string | null;
+          source_record_id: string | null;
+          ingested_at: string;
+          feature_schema_version: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          feature_definition_id: string;
+          security_id: string;
+          value: number;
+          observation_at: string;
+          effective_at?: string | null;
+          publication_at?: string | null;
+          available_at: string;
+          source: string;
+          source_version?: string | null;
+          source_record_id?: string | null;
+          ingested_at?: string;
+          feature_schema_version?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          feature_definition_id?: string;
+          security_id?: string;
+          value?: number;
+          observation_at?: string;
+          effective_at?: string | null;
+          publication_at?: string | null;
+          available_at?: string;
+          source?: string;
+          source_version?: string | null;
+          source_record_id?: string | null;
+          ingested_at?: string;
+          feature_schema_version?: string;
+          created_at?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "feature_values_feature_definition_id_fkey";
+            columns: ["feature_definition_id"];
+            referencedRelation: "feature_definitions";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -1991,6 +2096,7 @@ export type Database = {
       proposed_trade_order_type: ProposedTradeOrderType;
       proposed_trade_status: ProposedTradeStatus;
       proposed_trade_event_type: ProposedTradeEventType;
+      feature_family: FeatureFamily;
     };
   };
 };
