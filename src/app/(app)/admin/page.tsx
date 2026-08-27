@@ -35,12 +35,38 @@ export default async function AdminPage() {
             here.
           </p>
         </div>
-        <Link
-          href="/admin/usage"
-          className="focus-ring shrink-0 rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
-        >
-          Usage &amp; Costs →
-        </Link>
+        <nav className="flex shrink-0 flex-wrap gap-2">
+          <Link
+            href="/admin/usage"
+            className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
+          >
+            Usage &amp; Costs →
+          </Link>
+          <Link
+            href="/admin/models"
+            className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
+          >
+            Models →
+          </Link>
+          <Link
+            href="/admin/experiments"
+            className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
+          >
+            Experiments →
+          </Link>
+          <Link
+            href="/admin/candidates"
+            className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
+          >
+            Candidates →
+          </Link>
+          <Link
+            href="/admin/costs"
+            className="focus-ring rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-neutral-400 hover:text-white"
+          >
+            Cost Ledger →
+          </Link>
+        </nav>
       </header>
 
       <Link
