@@ -35,7 +35,7 @@ export type IngestionTrigger = "SCHEDULED" | "MANUAL";
 
 export type SignalDirection = "BULLISH" | "BEARISH" | "NEUTRAL";
 
-export type ResearchRunOrigin = "PMNTX_CORE" | "AGENT";
+export type ResearchRunOrigin = "PMNTX_CORE" | "AGENT" | "MODEL";
 export type ResearchRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 export type IdeaDirection = "LONG" | "SHORT" | "WATCH" | "PASS";
 
@@ -134,6 +134,22 @@ export type ModelPromotionEventType =
   | "PROMOTED_TO_PRODUCTION"
   | "DEMOTED"
   | "RETIRED";
+
+export type ExperimentLifecycleStatus =
+  | "PROPOSED"
+  | "DATASET_DEFINED"
+  | "TRAINING"
+  | "TRAINED"
+  | "VALIDATING"
+  | "VALIDATED"
+  | "WALK_FORWARD_TESTING"
+  | "TESTED"
+  | "COST_ADJUSTED"
+  | "BENCHMARKED"
+  | "PROMOTION_DECIDED"
+  | "COMPLETE"
+  | "FAILED";
+export type ModelRunStatus = "QUEUED" | "RUNNING" | "SUCCEEDED" | "FAILED" | "PARTIAL";
 
 export type AiBudgetEventType =
   | "BLOCKED_RUN_BUDGET"
@@ -2233,6 +2249,177 @@ export type Database = {
         Update: { id?: string; prediction_id?: string; feature_value_id?: string; created_at?: string };
         Relationships: [];
       };
+      experiments: {
+        Row: {
+          id: string;
+          name: string;
+          hypothesis: string;
+          universe: string | null;
+          features: unknown;
+          horizon: string | null;
+          benchmark: string | null;
+          success_criteria: string | null;
+          sample_requirements: string | null;
+          origin: string | null;
+          status: ExperimentLifecycleStatus;
+          feature_schema_version: string | null;
+          dataset_start_date: string | null;
+          dataset_end_date: string | null;
+          train_start_date: string | null;
+          train_end_date: string | null;
+          validation_start_date: string | null;
+          validation_end_date: string | null;
+          test_start_date: string | null;
+          test_end_date: string | null;
+          random_seed: number | null;
+          candidate_model_version_id: string | null;
+          benchmark_model_version_id: string | null;
+          survivorship_bias_warning: string | null;
+          cost_adjustment_bps: number | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          hypothesis: string;
+          universe?: string | null;
+          features?: unknown;
+          horizon?: string | null;
+          benchmark?: string | null;
+          success_criteria?: string | null;
+          sample_requirements?: string | null;
+          origin?: string | null;
+          status?: ExperimentLifecycleStatus;
+          feature_schema_version?: string | null;
+          dataset_start_date?: string | null;
+          dataset_end_date?: string | null;
+          train_start_date?: string | null;
+          train_end_date?: string | null;
+          validation_start_date?: string | null;
+          validation_end_date?: string | null;
+          test_start_date?: string | null;
+          test_end_date?: string | null;
+          random_seed?: number | null;
+          candidate_model_version_id?: string | null;
+          benchmark_model_version_id?: string | null;
+          survivorship_bias_warning?: string | null;
+          cost_adjustment_bps?: number | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          hypothesis?: string;
+          universe?: string | null;
+          features?: unknown;
+          horizon?: string | null;
+          benchmark?: string | null;
+          success_criteria?: string | null;
+          sample_requirements?: string | null;
+          origin?: string | null;
+          status?: ExperimentLifecycleStatus;
+          feature_schema_version?: string | null;
+          dataset_start_date?: string | null;
+          dataset_end_date?: string | null;
+          train_start_date?: string | null;
+          train_end_date?: string | null;
+          validation_start_date?: string | null;
+          validation_end_date?: string | null;
+          test_start_date?: string | null;
+          test_end_date?: string | null;
+          random_seed?: number | null;
+          candidate_model_version_id?: string | null;
+          benchmark_model_version_id?: string | null;
+          survivorship_bias_warning?: string | null;
+          cost_adjustment_bps?: number | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      experiment_runs: {
+        Row: {
+          id: string;
+          experiment_id: string;
+          started_at: string | null;
+          completed_at: string | null;
+          status: ExperimentLifecycleStatus;
+          results: unknown;
+          seed_used: number | null;
+          train_row_count: number | null;
+          validation_row_count: number | null;
+          test_row_count: number | null;
+          is_mock: boolean;
+          promotion_decision: string | null;
+          promoted_model_version_id: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          experiment_id: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          status?: ExperimentLifecycleStatus;
+          results?: unknown;
+          seed_used?: number | null;
+          train_row_count?: number | null;
+          validation_row_count?: number | null;
+          test_row_count?: number | null;
+          is_mock?: boolean;
+          promotion_decision?: string | null;
+          promoted_model_version_id?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          experiment_id?: string;
+          started_at?: string | null;
+          completed_at?: string | null;
+          status?: ExperimentLifecycleStatus;
+          results?: unknown;
+          seed_used?: number | null;
+          train_row_count?: number | null;
+          validation_row_count?: number | null;
+          test_row_count?: number | null;
+          is_mock?: boolean;
+          promotion_decision?: string | null;
+          promoted_model_version_id?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      model_runs: {
+        Row: {
+          id: string;
+          model_version_id: string;
+          research_run_id: string;
+          status: ModelRunStatus;
+          started_at: string | null;
+          completed_at: string | null;
+          error_message: string | null;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          model_version_id: string;
+          research_run_id: string;
+          status?: ModelRunStatus;
+          started_at?: string | null;
+          completed_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          model_version_id?: string;
+          research_run_id?: string;
+          status?: ModelRunStatus;
+          started_at?: string | null;
+          completed_at?: string | null;
+          error_message?: string | null;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -2269,6 +2456,8 @@ export type Database = {
       model_type: ModelType;
       model_status: ModelStatus;
       model_promotion_event_type: ModelPromotionEventType;
+      experiment_lifecycle_status: ExperimentLifecycleStatus;
+      model_run_status: ModelRunStatus;
     };
   };
 };
