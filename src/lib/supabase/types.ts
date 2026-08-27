@@ -1972,6 +1972,60 @@ export type Database = {
         };
         Relationships: [];
       };
+      cost_ledger_entries: {
+        Row: {
+          id: string;
+          provider: string;
+          category: string;
+          model_version_id: string | null;
+          agent_id: string | null;
+          security_id: string | null;
+          research_run_id: string | null;
+          experiment_run_id: string | null;
+          prediction_id: string | null;
+          ai_execution_id: string | null;
+          workflow_id: string | null;
+          estimated_cost_usd: number | null;
+          actual_cost_usd: number | null;
+          cost_date: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          provider: string;
+          category: string;
+          model_version_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          research_run_id?: string | null;
+          experiment_run_id?: string | null;
+          prediction_id?: string | null;
+          ai_execution_id?: string | null;
+          workflow_id?: string | null;
+          estimated_cost_usd?: number | null;
+          actual_cost_usd?: number | null;
+          cost_date?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          provider?: string;
+          category?: string;
+          model_version_id?: string | null;
+          agent_id?: string | null;
+          security_id?: string | null;
+          research_run_id?: string | null;
+          experiment_run_id?: string | null;
+          prediction_id?: string | null;
+          ai_execution_id?: string | null;
+          workflow_id?: string | null;
+          estimated_cost_usd?: number | null;
+          actual_cost_usd?: number | null;
+          cost_date?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
       daily_rank_snapshots: {
         Row: {
           id: string;
