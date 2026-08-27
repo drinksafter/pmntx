@@ -1821,6 +1821,12 @@ export type Database = {
           selected: boolean;
           selection_reason: string | null;
           direction: IdeaDirection | null;
+          model_disagreement: number | null;
+          novelty_signal: number | null;
+          material_change_flag: boolean;
+          recommended_next_tier: string | null;
+          horizon: ForecastHorizon | null;
+          confidence: number | null;
           created_at: string;
         };
         Insert: {
@@ -1833,6 +1839,12 @@ export type Database = {
           selected?: boolean;
           selection_reason?: string | null;
           direction?: IdeaDirection | null;
+          model_disagreement?: number | null;
+          novelty_signal?: number | null;
+          material_change_flag?: boolean;
+          recommended_next_tier?: string | null;
+          horizon?: ForecastHorizon | null;
+          confidence?: number | null;
           created_at?: string;
         };
         Update: {
@@ -1845,7 +1857,31 @@ export type Database = {
           selected?: boolean;
           selection_reason?: string | null;
           direction?: IdeaDirection | null;
+          model_disagreement?: number | null;
+          novelty_signal?: number | null;
+          material_change_flag?: boolean;
+          recommended_next_tier?: string | null;
+          horizon?: ForecastHorizon | null;
+          confidence?: number | null;
           created_at?: string;
+        };
+        Relationships: [];
+      };
+      candidate_ranking_configs: {
+        Row: { id: boolean; max_candidates: number; min_score_threshold: number | null; updated_at: string; updated_by: string | null };
+        Insert: {
+          id?: boolean;
+          max_candidates?: number;
+          min_score_threshold?: number | null;
+          updated_at?: string;
+          updated_by?: string | null;
+        };
+        Update: {
+          id?: boolean;
+          max_candidates?: number;
+          min_score_threshold?: number | null;
+          updated_at?: string;
+          updated_by?: string | null;
         };
         Relationships: [];
       };
